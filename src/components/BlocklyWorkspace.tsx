@@ -96,13 +96,15 @@ export const BlocklyWorkspace = forwardRef<
       onInject?.(workspace);
 
       // Notify about workspace changes
-      const handleWorkspaceChange = () => {
+      const [handleWorkspaceChange, cancelDebounce] = debounce(() => {
         onWorkspaceChange?.(workspace);
-      };
+      }, 200);
+
       workspace.addChangeListener(handleWorkspaceChange);
 
       return () => {
         workspace.removeChangeListener(handleWorkspaceChange);
+        cancelDebounce();
         workspace.dispose();
         onDispose?.(workspace);
         workspaceRef.current = null;
