@@ -1,0 +1,119 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #FFF8F4;
+    overflow: hidden; /* 防止出現滾動條 */
+}
+
+.container {
+    width: 100%;
+    height: 100vh; /* 確保容器填滿整個視窗 */
+    display: flex;
+}
+
+/* 左邊部分 */
+.left-wrapper {
+    flex: 1;
+    background-color: #00C1D4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom-right-radius: 150px;
+}
+
+.left {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.left h1 {
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+}
+
+.left .arrows {
+    font-size: 2.5rem;
+    color: #FFD700;
+}
+
+/* 右邊部分 */
+.right-wrapper {
+    flex: 1;
+    background-color: #00C1D4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* border-top-left-radius: 150px; */
+}
+
+.right {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+	background-color: #FFF8F4;
+	border-top-left-radius: 150px;
+}
+
+.right h2 {
+    font-size: 3.5rem;
+    margin-bottom: 2rem;
+    color: #5A3E36;
+}
+
+.form-group {
+    width: 80%; /* 調整表單寬度 */
+    margin-bottom: 1.5rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 1.5rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1.2rem;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    background-color: transparent;
+    text-align: center;
+}
+
+.form-group input:focus {
+    border-color: #00C1D4;
+    outline: none;
+}
+
+.submit-button {
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    background-color: #FF8000;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #E07100;
+}
