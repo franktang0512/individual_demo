@@ -8,21 +8,21 @@ import { useState, useEffect } from "react";
 export const Route = createRootRoute({
   component: () => {
     const location = useLocation();  // 使用 useLocation 來獲取當前路徑
-    const [studentName, setStudentName] = useState<string>(localStorage.getItem("studentName") || "");
+    const [studentName, setStudentName] = useState<string>("");
 
     // 假設學生姓名是這樣取得的
     // const studentName = "franksssssssssssss";
 
-    useEffect(() => {
-      const handleStorageChange = () => {
-        setStudentName(localStorage.getItem("studentName") || "未登入");
-      };
+    // useEffect(() => {
+    //   const handleStorageChange = () => {
+    //     setStudentName( "");
+    //   };
 
-      window.addEventListener("storage", handleStorageChange);
-      return () => {
-        window.removeEventListener("storage", handleStorageChange);
-      };
-    }, []);
+    //   window.addEventListener("storage", handleStorageChange);
+    //   return () => {
+    //     window.removeEventListener("storage", handleStorageChange);
+    //   };
+    // }, []);
 
     return (
       <div id="app-wrapper" className="mx-auto flex h-dvh max-h-[1200px] max-w-[2000px] flex-col">
