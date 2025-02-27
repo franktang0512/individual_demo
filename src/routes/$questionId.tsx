@@ -232,13 +232,19 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
 function CheckmarkIcon({ isCorrect }: { isCorrect: boolean }) {
     return (
         <span
-            className={`mr-2 font-bold ${isCorrect ? 'text-green-400' : 'text-white'}`}
-            style={{ color: isCorrect ? '#8FFF00' : '#FFFFFF' }} // 這裡強制覆蓋 Tailwind
+            className={`mr-2 font-bold ${isCorrect ? 'text-[#8FFF00]' : 'text-white'}`}
+            style={{
+                color: isCorrect ? "#8FFF00" : "#FFFFFF",
+                // fontSize: isCorrect ? "23px" : "",
+                fontWeight: "bold",
+                textShadow: isCorrect ? "1px 1px 0 #8FFF00, -1px -1px 0 #8FFF00" : ""
+            }}
         >
-            {isCorrect ? '✔' : '🗙'}
+            {isCorrect ? '✓' : '🗙'}
         </span>
-    )
+    );
 }
+
 
 
 function SubmitTab({ questionData }: { questionData: any }) {
@@ -247,6 +253,9 @@ function SubmitTab({ questionData }: { questionData: any }) {
     const [isEvaluated, setIsEvaluated] = useState(false);
     const [cases, setCases] = useState<any[]>(questionData?.cases || []);
     const [score, setScore] = useState(0); // ✅ 追蹤評分百分比
+    const [numerator, setNumerator] = useState(0); // 分子
+    const [denominator, setDenominator] = useState(0); //分母
+
     const generatedCode = useWorkspaceStore((state) => state.generatedCode); // 取得 Blockly 產生的程式碼
 
     if (!questionData) return <p>載入中...</p>;
@@ -325,10 +334,14 @@ function SubmitTab({ questionData }: { questionData: any }) {
 
         cases.forEach((group: any) => {
             group.subcase.forEach((sub: any) => {
-                totalTests+=sub.score;
-                if (sub.result) correctCount+=sub.score;
+                totalTests += Number(sub.score);
+                if (sub.result) correctCount += Number(sub.score);
             });
         });
+        setNumerator(correctCount);
+        setDenominator(totalTests);
+
+
         return totalTests === 0 ? 0 : Math.round((correctCount / totalTests) * 100);
     };
 
@@ -345,7 +358,8 @@ function SubmitTab({ questionData }: { questionData: any }) {
                     ></div>
                     {isEvaluated && (
                         <span className="absolute w-full text-center font-bold text-black">
-                            {score}%
+                            {numerator}/{denominator}
+                            {/* {score}% */}
                         </span>
                     )}
                 </div>
@@ -353,7 +367,9 @@ function SubmitTab({ questionData }: { questionData: any }) {
                 {/* 🔹 按鈕區塊 */}
                 <div className="flex justify-center gap-4 mt-4">
                     <button
-                        className="bg-[#00D1D0] text-white font-bold py-2 px-4 rounded-full border border-[#00D1D0]"
+                        // className="bg-[#00D1D0] text-white font-bold py-2 px-4 rounded-full border border-[#00D1D0]"
+                        className="bg-white text-[#00D1D0] font-bold py-2 px-4 rounded-full border border-white shadow-md transition duration-300 hover:bg-gray-100 hover:shadow-lg"
+
                         onClick={() => judgeCode()}
                     >
                         進行評分
@@ -361,69 +377,36 @@ function SubmitTab({ questionData }: { questionData: any }) {
                 </div>
 
                 {/* 🔹 題目測試資料 */}
-                <div className="flex flex-col items-center gap-6 mt-6 w-full">
+                <div className="flex flex-col items-center gap-4 mt-4 w-full">
                     {cases.map((group: any, index: number) => (
                         <div key={index} className="w-full relative">
                             <button
-                                className={`font-bold py-4 px-6 rounded-full w-full shadow-md border relative z-10 transition-all ${isEvaluated
+                                className={`flex flex-col items-center justify-center font-bold py-3 px-5 rounded-full w-full shadow-md border relative z-10 transition-all ${isEvaluated
                                         ? group.subcase.every((sub: any) => sub.result)
-                                            ? "bg-[#2B8A3E] text-white border-[#2B8A3E]"
-                                            : "bg-[#D9534F] text-white border-[#D9534F]"
+                                            ? "bg-[#28af68] text-white border-[#28af68]"
+                                            : "bg-[#ff6161] text-white border-[#ff6161]"
                                         : "bg-white text-black border-gray-300"
                                     }`}
                                 onClick={() =>
                                     setActiveCase(activeCase === group.group_title ? null : group.group_title)
                                 }
                             >
-                                {group.group_title}
-                            </button>
+                                {/* ✅ Group Title (Centered) */}
+                                <span className="text-lg">{group.group_title}</span>
 
-                            {activeCase === group.group_title && (
-                                <div
-                                    className="w-full font-bold py-4 px-6 rounded-lg shadow-md relative -mt-3 text-center border border-gray-300"
-                                    style={{
-                                        backgroundColor: isEvaluated
-                                            ? group.subcase.every((sub: any) => sub.result)
-                                                ? "#2B8A3E"
-                                                : "#D9534F"
-                                            : "#D9D9D9"
-                                    }}
-                                >
-                                    <div className="flex flex-col items-center mt-2 px-6 gap-2">
+                                {/* ✅ Checkmarks (Smaller and in a Row) */}
+                                {isEvaluated && (
+                                    <div className="flex flex-wrap justify-center items-center gap-2 mt-1">
                                         {group.subcase.map((sub: any, idx: number) => (
-                                            <p
-                                                key={idx}
-                                                className="flex items-center justify-center px-4 py-2 w-full rounded-md transition-all text-center"
-                                                style={{
-                                                    // backgroundColor: isEvaluated
-                                                    //     ? sub.result
-                                                    //         ? "#2B8A3E"
-                                                    //         : "#D9534F"
-                                                    //     : "#D9D9D9",
-                                                    color: isEvaluated ? "white" : "black",
-                                                    fontWeight: isEvaluated ? "bold" : "normal"
-                                                }}
-                                            >
-                                                {isEvaluated && (
-                                                    <span
-                                                        className={`mr-2 font-bold ${sub.result ? "text-green-400" : "text-white"
-                                                            }`}
-                                                        style={{
-                                                            color: sub.result ? "#8FFF00" : "#FFFFFF"
-                                                        }}
-                                                    >
-                                                        {sub.result ? "✔" : "🗙"}
-                                                    </span>
-                                                )}
-                                                {sub.case_title}
-                                            </p>
+                                            <CheckmarkIcon key={idx} isCorrect={sub.result === true} />
                                         ))}
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </button>
                         </div>
                     ))}
                 </div>
+
             </div>
         </TabComponentWrapper>
     );
