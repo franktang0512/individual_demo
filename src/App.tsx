@@ -4,7 +4,7 @@ import { useState } from "react";
 import "./index.css";
 
 // ✅ 建立 Router
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree, basepath: "/individual/" });
 
 // 📦 聲明 Router 型別
 declare module "@tanstack/react-router" {

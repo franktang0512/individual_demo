@@ -1,40 +1,35 @@
-import { CodeEditor } from '@/components/CodeEditor'
-// import { Simulator } from "@/components/Simulator";
-import { Separator } from '@/components/ui/separator'
-// import { Slider } from "@/components/ui/slider";
-// import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { createFileRoute } from '@tanstack/react-router'
+import { CodeEditor } from '@/components/CodeEditor'
+import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useNavigate } from '@tanstack/react-router'; // 確保使用的是正確的 useNavigate
-
-import { useSimulationStore } from '@/stores/simulation'
-// import { useEffect, useRef } from 'react'
 import { useState, useEffect, useRef, useMemo } from 'react';
-// import { useToast } from "@/hooks/use-toast";
 import {
     ResizableHandle,
     ResizablePanel,
     ResizablePanelGroup,
 } from '@/components/ui/resizable'
 import type { ImperativePanelGroupHandle } from 'react-resizable-panels'
-import * as Blockly from "blockly/core";
-// import * as Blockly from "blockly";
-
 import { useLocation } from "@tanstack/react-router";
-import { useQidStore } from "@/stores/useQidStore";
 import { useWorkspaceStore } from "@/stores/workspace";
 
-export const Route = createFileRoute('/question')({
-    component: Question,
+export const Route = createFileRoute('/$questionId')({
+  component: RouteComponent,
 })
+
+function RouteComponent() {
+  const { questionId } = Route.useParams();
+
+  return <Question id={Number(questionId)} />
+}
+
+// 下面都是從 src/routes/question.tsx copy-paste 過來的，我沒改（除了標注✨的）
 
 interface TabItem {
     value: string
     title: string
-    // content: React.ReactNode
     content: JSX.Element;
 }
-
 
 function TabComponentWrapper({ title, children }: { title: string; children: React.ReactNode }) {
     return (
@@ -46,6 +41,7 @@ function TabComponentWrapper({ title, children }: { title: string; children: Rea
         </div>
     );
 }
+
 // 點範例按鈕後可以看到的內容
 interface ExampleButtonProps {
     text: string
@@ -291,7 +287,7 @@ function SubmitTab({ questionData }: { questionData: any }) {
                             ${modifiedCode}
                             return typeof output_result_string !== "undefined" ? output_result_string : "未定義 output_result_string";
                         })();
-                    `);                    
+                    `);
                     result = executeFunction(testInputs);
                     // console.log(result);
                 } catch (error: any) {
@@ -447,19 +443,17 @@ const mapLayouts = {
     3: [60, 40],
 }
 
-function Question() {
+function Question({ id }: { id: number }) {
     const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
-    const currentWorldId = useSimulationStore((state) => state.currentWorldId);
-    // const location = useLocation() as { state: Record<string, unknown> };
+    // const location = useLocation() as { state: Record<string, unknown> }; // ✨
     const location = useLocation();
-    const id: number = Number((location.state as { id?: string | number })?.id) || 1;
 
     const [questionData, setQuestionData] = useState<{
         title: string;
         statements: any[];
         example_cases: any[];
         cases: any[];
-    } | null>(null);    
+    } | null>(null);
 
     const setGeneratedCode = useWorkspaceStore((state) => state.setGeneratedCode);
     const setGeneratedXMLCode = useWorkspaceStore((state) => state.setGeneratedXMLCode);
@@ -600,7 +594,7 @@ function Question() {
             },
         ];
     }, [questionData]);  // 🔥 `questionData` 變更時，`tabItems` 會重新計算
-    
+
 
     return (
         <ResizablePanelGroup

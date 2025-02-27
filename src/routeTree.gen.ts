@@ -11,21 +11,14 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as QuestionsImport } from './routes/questions'
-import { Route as QuestionImport } from './routes/question'
+import { Route as QuestionIdImport } from './routes/$questionId'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
 
-const QuestionsRoute = QuestionsImport.update({
-  id: '/questions',
-  path: '/questions',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const QuestionRoute = QuestionImport.update({
-  id: '/question',
-  path: '/question',
+const QuestionIdRoute = QuestionIdImport.update({
+  id: '/$questionId',
+  path: '/$questionId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,18 +39,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/question': {
-      id: '/question'
-      path: '/question'
-      fullPath: '/question'
-      preLoaderRoute: typeof QuestionImport
-      parentRoute: typeof rootRoute
-    }
-    '/questions': {
-      id: '/questions'
-      path: '/questions'
-      fullPath: '/questions'
-      preLoaderRoute: typeof QuestionsImport
+    '/$questionId': {
+      id: '/$questionId'
+      path: '/$questionId'
+      fullPath: '/$questionId'
+      preLoaderRoute: typeof QuestionIdImport
       parentRoute: typeof rootRoute
     }
   }
@@ -67,42 +53,37 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/question': typeof QuestionRoute
-  '/questions': typeof QuestionsRoute
+  '/$questionId': typeof QuestionIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/question': typeof QuestionRoute
-  '/questions': typeof QuestionsRoute
+  '/$questionId': typeof QuestionIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/question': typeof QuestionRoute
-  '/questions': typeof QuestionsRoute
+  '/$questionId': typeof QuestionIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/question' | '/questions'
+  fullPaths: '/' | '/$questionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/question' | '/questions'
-  id: '__root__' | '/' | '/question' | '/questions'
+  to: '/' | '/$questionId'
+  id: '__root__' | '/' | '/$questionId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  QuestionRoute: typeof QuestionRoute
-  QuestionsRoute: typeof QuestionsRoute
+  QuestionIdRoute: typeof QuestionIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  QuestionRoute: QuestionRoute,
-  QuestionsRoute: QuestionsRoute,
+  QuestionIdRoute: QuestionIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -116,18 +97,14 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/question",
-        "/questions"
+        "/$questionId"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/question": {
-      "filePath": "question.tsx"
-    },
-    "/questions": {
-      "filePath": "questions.tsx"
+    "/$questionId": {
+      "filePath": "$questionId.tsx"
     }
   }
 }
