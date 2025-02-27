@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import "../questions.css";
+import firstIcon from "@/assets/icons/1.png"
+import secondIcon from "@/assets/icons/2.png"
 
 // ✅ 題目列表的資料類型
 interface Question {
@@ -11,8 +13,8 @@ interface Question {
 
 // ✅ 題目清單
 const questionList: Question[] = [
-  { id: 1, name: "刮刮樂", iconUrl: "/img/1.png" },
-  { id: 2, name: "活動分組", iconUrl: "/img/2.png" },
+  { id: 1, name: "刮刮樂", iconUrl: firstIcon },
+  { id: 2, name: "活動分組", iconUrl: secondIcon },
 ];
 
 const Questions: React.FC = () => {
