@@ -11,20 +11,21 @@ const RootComponent: React.FC = () => {
 
   return (
     <div id="app-wrapper" className="mx-auto flex h-dvh max-h-[1200px] max-w-[2000px] flex-col">
-      <header id="app-header" className="flex justify-center items-center px-12 py-6 relative">
-        {/* 左側標題 */}
-        <div className="absolute left-12 flex items-center gap-2">
-          <h1 className="text-xl font-semibold">全國資訊科技示範賽</h1>
-          <Separator orientation="vertical" className="mx-2 h-6 bg-gray-300" />
+      {/* <header id="app-header" className="flex justify-center items-center px-12 py-6 relative"> */}
+      <header id="app-header" className="flex items-center px-12 py-6 relative">
+        {/* 左側標題 + 任務列表按鈕 */}
+        <div className="flex items-center gap-4 flex-shrink-0">
+          <h1 className="text-xl font-semibold whitespace-nowrap">
+            113學年度科技教育創意實作競賽【資訊科技組示範賽】
+          </h1>
+          <Separator orientation="vertical" className="h-6 bg-gray-300" />
           <span className="text-xl font-semibold text-cyan-400">個人賽練習題</span>
-        </div>
 
-        {/* ✅ 讓按鈕絕對置中 */}
-        {!isOnQuestionListPage && (
-          <div className="flex justify-center">
+          {/* ✅ 按鈕 - 預設置中，但標題變長時會被擠到標題後面 */}
+          {!isOnQuestionListPage && (
             <Link
               to="/"
-              className="rounded-full bg-white px-6 py-3 text-gray-700 transition duration-300 ease-in-out flex items-center shadow-sm hover:shadow-lg"
+              className="rounded-full bg-white px-6 py-3 text-gray-700 transition duration-300 ease-in-out flex items-center shadow-sm hover:shadow-lg flex-shrink-0"
             >
               {/* 圖示 */}
               <img
@@ -34,16 +35,10 @@ const RootComponent: React.FC = () => {
               />
               <span className="font-bold">任務列表</span>
             </Link>
-          </div>
-        )}
-
-        {/* 右側顯示學生姓名 */}
-        <div className="absolute right-12 flex items-center gap-6">
-          {studentName && (
-            <div className="text-lg text-gray-700">{studentName}</div>
           )}
         </div>
       </header>
+
       <main id="app-main" className="grow px-8">
         <Outlet />
       </main>
@@ -52,7 +47,7 @@ const RootComponent: React.FC = () => {
           <header id="app-header" className="flex justify-between items-center px-12 py-6">
             {/* 左側標題 */}
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold">全國資訊科技示範賽</h1>
+              <h1 className="text-xl font-semibold">113學年度科技教育創意實作競賽【資訊科技組示範賽】</h1>
               <Separator orientation="vertical" className="mx-2 h-6 bg-gray-300" />
               <span className="text-xl font-semibold text-cyan-400">個人賽練習題</span>
             </div>
