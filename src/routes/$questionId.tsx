@@ -12,6 +12,7 @@ import {
 import type { ImperativePanelGroupHandle } from 'react-resizable-panels'
 import { useLocation } from "@tanstack/react-router";
 import { useWorkspaceStore } from "@/stores/workspace";
+import flagicon from "@/assets/icons/flag.svg"
 
 export const Route = createFileRoute('/$questionId')({
     component: RouteComponent,
@@ -186,7 +187,7 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
                             onClick={drillClick}
                         >
                             {currentMode === "Scratch" ? (
-                                <img src="/individual/img/flag.svg" alt="Start" className="w-8 h-8" />
+                                <img src= {flagicon} alt="Start" className="w-8 h-8" />
                             ) : (
                                 <span className="text-lg font-bold text-green-500 tracking-widest whitespace-nowrap">
                                     執行
