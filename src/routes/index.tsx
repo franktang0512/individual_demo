@@ -25,12 +25,12 @@ function Index() {
             key={question.id}
             to="/$questionId"
             params={{ questionId: String(question.id) }}
-            className="w-40 p-4 text-center shadow-md gap-4 bg-gray-50 flex flex-col justify-between rounded-lg hover:shadow-xl"
+            className="grid-item"
           >
             <img
               src={question.iconUrl}
               alt={question.name}
-              className={cn("flex-1", question.id === 2 && "ml-3")} // question 2 的圖不在正中間，需要調整位置
+              className="grid-item-img"
             />
             <h3>{question.name}</h3>
           </Link>
@@ -39,6 +39,7 @@ function Index() {
     </div>
   );
 }
+
 
 export const Route = createFileRoute("/")({
   component: Index,

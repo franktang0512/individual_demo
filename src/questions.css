@@ -1,34 +1,20 @@
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 個格子，等寬 */
-    gap: 30px; /* 增加格子間距 */
-    width: fit-content; /* 自適應內容寬度 */
-    padding: 20px; /* 內部留點距離 */
-    /* background-color: white; 加上背景，讓它看起來像一個獨立的區塊 */
-    border-radius: 15px; /* 圓角效果 */
-    /* box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); 添加陰影來強化格子感 */
-    margin: auto; /* ⬅️ 這行讓整個網格水平置中 */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* ⬅️ 這行讓它垂直置中 */
-}
+
 
 /* ✅ 格子設定 */
-.grid-item {
+/* .grid-item {
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     padding: 20px;
     width: 180px;
-    height: 220px; /* 讓格子保持相等 */
+    height: 220px; 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
+} */
 
 /* ✅ 增加 hover 效果 */
 .grid-item:hover {
@@ -37,15 +23,68 @@
 }
 
 /* ✅ 圖片置中 & 保持大小 */
-.grid-item-img {
+/* .grid-item-img {
     width: 80px;
     height: 80px;
     margin-bottom: 10px;
-}
+} */
 
 /* ✅ 題目標題樣式 */
-.grid-item h3 {
+/* .grid-item h3 {
     font-size: 1.4rem;
     color: #5A3E36;
     margin-top: 10px;
+} */
+
+
+
+
+
+/* ✅ 外部容器 */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 個格子，等寬 */
+    gap: 30px; /* 增加格子間距 */
+    width: fit-content; /* 自適應內容寬度 */
+    padding: 20px; /* 內部留點距離 */
+    border-radius: 15px; /* 圓角效果 */
+    margin: auto; /* ⬅️ 讓整個網格水平置中 */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* ⬅️ 讓它垂直置中 */
+}
+
+/* ✅ 格子設定 */
+.grid-item {
+    position: relative; /* 讓圖片可以 `absolute` 懸浮 */
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 180px;
+    height: 150px; /* ✅ 降低高度，減少底部空白 */
+    padding-top: 50px; /* ✅ 確保 h3 不會被圖片擠壓 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* ✅ 讓內容從上開始排列 */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ✅ 圖片懸浮 */
+.grid-item-img {
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: -30px; /* ✅ 讓圖片稍微懸浮，不要太誇張 */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* ✅ 調整標題，避免被圖片擋住 */
+.grid-item h3 {
+    font-size: 1.4rem;
+    color: #5A3E36;
+    margin-top: 20px; /* ✅ 確保文字不會太靠上 */
 }
