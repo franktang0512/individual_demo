@@ -2,12 +2,22 @@ import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/toaster";
 import { createRootRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 
+import { useWorkspaceStore } from "@/stores/workspace";
+
+
 const RootComponent: React.FC = () => {
   const studentName = "";
   const pathname = useLocation({
     select: (location) => location.pathname,
   })
   const isOnQuestionListPage = pathname === "/individual/";
+
+  const { resetWorkspaces } = useWorkspaceStore();
+  const handleResetAndNavigate = () => {
+    resetWorkspaces(); 
+  };
+
+
 
   return (
     <div id="app-wrapper" className="mx-auto flex h-dvh max-h-[1200px] max-w-[2000px] flex-col">
@@ -25,6 +35,7 @@ const RootComponent: React.FC = () => {
           {!isOnQuestionListPage && (
             <Link
               to="/"
+              onClick={handleResetAndNavigate}
               className="rounded-full bg-white px-6 py-3 text-gray-700 transition duration-300 ease-in-out flex items-center shadow-sm hover:shadow-lg flex-shrink-0"
             >
               {/* 圖示 */}
