@@ -1,8 +1,8 @@
 import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/toaster";
 import { createRootRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
-
 import { useWorkspaceStore } from "@/stores/workspace";
+import homeIcon from "@/assets/icons/TaskListIcon.png"
 
 
 const RootComponent: React.FC = () => {
@@ -40,7 +40,7 @@ const RootComponent: React.FC = () => {
             >
               {/* 圖示 */}
               <img
-                src="img/TaskListIcon.png"
+                src={homeIcon}
                 alt="Task List Icon"
                 className="w-5 h-5 mr-2"
               />
