@@ -14,13 +14,13 @@ import { useLocation } from "@tanstack/react-router";
 import { useWorkspaceStore } from "@/stores/workspace";
 
 export const Route = createFileRoute('/$questionId')({
-  component: RouteComponent,
+    component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { questionId } = Route.useParams();
+    const { questionId } = Route.useParams();
 
-  return <Question id={Number(questionId)} />
+    return <Question id={Number(questionId)} />
 }
 
 // 下面都是從 src/routes/question.tsx copy-paste 過來的，我沒改（除了標注✨的）
@@ -186,7 +186,7 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
                             onClick={drillClick}
                         >
                             {currentMode === "Scratch" ? (
-                                <img src="/img/flag.svg" alt="Start" className="w-8 h-8" />
+                                <img src="/individual/img/flag.svg" alt="Start" className="w-8 h-8" />
                             ) : (
                                 <span className="text-lg font-bold text-green-500 tracking-widest whitespace-nowrap">
                                     執行
@@ -314,13 +314,21 @@ function SubmitTab({ questionData }: { questionData: any }) {
         let totalTests = 0;
         let correctCount = 0;
 
+        // cases.forEach((group: any) => {
+        //     group.subcase.forEach((sub: any) => {
+        //         totalTests++;
+        //         if (sub.result) correctCount++;
+        //     });
+        // });
+
+        // return totalTests === 0 ? 0 : Math.round((correctCount / totalTests) * 100);
+
         cases.forEach((group: any) => {
             group.subcase.forEach((sub: any) => {
-                totalTests++;
-                if (sub.result) correctCount++;
+                totalTests+=sub.score;
+                if (sub.result) correctCount+=sub.score;
             });
         });
-
         return totalTests === 0 ? 0 : Math.round((correctCount / totalTests) * 100);
     };
 
@@ -331,9 +339,8 @@ function SubmitTab({ questionData }: { questionData: any }) {
                 {/* 🔹 進度條 */}
                 <div className="w-full max-w-lg bg-gray-200 rounded-full h-6 flex items-center relative">
                     <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                            isEvaluated ? "bg-green-500" : "bg-gray-200"
-                        }`}
+                        className={`h-full rounded-full transition-all duration-500 ${isEvaluated ? "bg-green-500" : "bg-gray-200"
+                            }`}
                         style={{ width: isEvaluated ? `${score}%` : "0%" }}
                     ></div>
                     {isEvaluated && (
@@ -358,13 +365,12 @@ function SubmitTab({ questionData }: { questionData: any }) {
                     {cases.map((group: any, index: number) => (
                         <div key={index} className="w-full relative">
                             <button
-                                className={`font-bold py-4 px-6 rounded-full w-full shadow-md border relative z-10 transition-all ${
-                                    isEvaluated
+                                className={`font-bold py-4 px-6 rounded-full w-full shadow-md border relative z-10 transition-all ${isEvaluated
                                         ? group.subcase.every((sub: any) => sub.result)
                                             ? "bg-[#2B8A3E] text-white border-[#2B8A3E]"
                                             : "bg-[#D9534F] text-white border-[#D9534F]"
                                         : "bg-white text-black border-gray-300"
-                                }`}
+                                    }`}
                                 onClick={() =>
                                     setActiveCase(activeCase === group.group_title ? null : group.group_title)
                                 }
@@ -400,9 +406,8 @@ function SubmitTab({ questionData }: { questionData: any }) {
                                             >
                                                 {isEvaluated && (
                                                     <span
-                                                        className={`mr-2 font-bold ${
-                                                            sub.result ? "text-green-400" : "text-white"
-                                                        }`}
+                                                        className={`mr-2 font-bold ${sub.result ? "text-green-400" : "text-white"
+                                                            }`}
                                                         style={{
                                                             color: sub.result ? "#8FFF00" : "#FFFFFF"
                                                         }}
@@ -465,6 +470,9 @@ function Question({ id }: { id: number }) {
             statements: [
                 {
                     text: "百貨公司週年慶期間發出多張刮刮樂卡，刮開的數字若正讀或反讀皆一致，就可換取獎品一份。\n給定刮刮樂卡的起、迄數字，計算總共該準備幾份贈品。\n\n刮刮樂卡的起迄數字皆介於 1 及 999999。"
+                },
+                {
+                    table: ""
                 }
             ],
             example_cases: [
@@ -478,38 +486,183 @@ function Question({ id }: { id: number }) {
                     title: "範例二",
                     input: "11112 19999",
                     output: "88",
-                    description: "刮刮樂卡的起始號碼為 11112，結束號碼為 19999。\n其中刮開的數字 11211、11311、...、19991 之正讀、反讀皆一致，因此共需準備 88 份贈品。"
+                    description: "刮刮樂卡的起始號碼為 11112，結束號碼為 19999。\n其中刮開的數字 11211、11311、...、11911、12021、12121、...、12921、...、19091、19191、...、19991 之正讀、反讀皆一致，因此共需準備 88 份贈品。"
                 }
             ],
             cases: [
                 {
                     group_title: "只測試個位數",
                     subcase: [
-                        { case_title: "情況一", input: "0 1", output: "2", score: "4" },
-                        { case_title: "情況二", input: "1 1", output: "1", score: "4" }
+                        {
+                            case_title: "情況一",
+                            input: "0 1",
+                            output: "2",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況二",
+                            input: "1 1",
+                            output: "1",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況三",
+                            input: "0 9",
+                            output: "10",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況四",
+                            input: "5 8",
+                            output: "4",
+                            score: "4"
+                        }
                     ]
                 },
                 {
                     group_title: "只測試兩位數",
-                    subcase: [{ case_title: "情況一", input: "10 99", output: "9", score: "4" }]
+                    subcase: [
+                        {
+                            case_title: "情況一",
+                            input: "10 99",
+                            output: "9",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況二",
+                            input: "31 89",
+                            output: "6",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況三",
+                            input: "19 21",
+                            output: "0",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況四",
+                            input: "99 99",
+                            output: "1",
+                            score: "4"
+                        }
+                    ]
                 },
                 {
                     group_title: "只測試三位數",
-                    subcase: [{ case_title: "情況一", input: "100 999", output: "90", score: "4" }]
+                    subcase: [
+                        {
+                            case_title: "情況一",
+                            input: "100 999",
+                            output: "90",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況二",
+                            input: "111 444",
+                            output: "34",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況三",
+                            input: "888 999",
+                            output: "12",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況四",
+                            input: "370 666",
+                            output: "30",
+                            score: "4"
+                        }
+                    ]
                 },
                 {
                     group_title: "只測試四位數",
-                    subcase: [{ case_title: "情況一", input: "1000 9999", output: "90", score: "4" }]
+                    subcase: [
+                        {
+                            case_title: "情況一",
+                            input: "1000 9999",
+                            output: "90",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況二",
+                            input: "2345 6789",
+                            output: "44",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況三",
+                            input: "1111 1112",
+                            output: "1",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況四",
+                            input: "1201 9087",
+                            output: "79",
+                            score: "4"
+                        }
+                    ]
                 },
                 {
                     group_title: "只測試五位數",
                     subcase: [
-                        { case_title: "情況一", input: "10000 99999", output: "900", score: "4" }
+                        {
+                            case_title: "情況一",
+                            input: "10000 99999",
+                            output: "900",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況二",
+                            input: "11111 11111",
+                            output: "1",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況三",
+                            input: "79797 97979",
+                            output: "183",
+                            score: "4"
+                        },
+                        {
+                            case_title: "情況四",
+                            input: "12345 67890",
+                            output: "555",
+                            score: "4"
+                        }
                     ]
                 },
                 {
                     group_title: "只測試六位數",
-                    subcase: [{ case_title: "情況一", input: "100000 999999", output: "900", score: "5" }]
+                    subcase: [
+                        {
+                            case_title: "情況一",
+                            input: "100000 999999",
+                            output: "900",
+                            score: "5"
+                        },
+                        {
+                            case_title: "情況二",
+                            input: "123456 567890",
+                            output: "444",
+                            score: "5"
+                        },
+                        {
+                            case_title: "情況三",
+                            input: "797979 979797",
+                            output: "181",
+                            score: "5"
+                        },
+                        {
+                            case_title: "情況四",
+                            input: "111111 111111",
+                            output: "1",
+                            score: "5"
+                        }
+                    ]
                 }
             ]
         },
@@ -590,7 +743,7 @@ function Question({ id }: { id: number }) {
             {
                 value: 'tab4',
                 title: '挑戰紀錄',
-                content: <RecordTab questionData={questionData}/>,
+                content: <RecordTab questionData={questionData} />,
             },
         ];
     }, [questionData]);  // 🔥 `questionData` 變更時，`tabItems` 會重新計算
@@ -603,7 +756,7 @@ function Question({ id }: { id: number }) {
             className="flex h-full overflow-clip rounded-t-2xl"
         >
             <ResizablePanel >
-                <CodeEditor key={id}  />
+                <CodeEditor key={id} />
                 {/* <CodeEditor key={id} /> */}
             </ResizablePanel>
             <ResizableHandle withHandle />
