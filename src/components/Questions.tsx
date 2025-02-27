@@ -20,7 +20,8 @@ const Questions: React.FC = () => {
 
   // ✅ 點擊題目時，將 `q` 存入 `search`
   const handleQuestionClick = (id: number) => {
-    navigate({ to: "/question", state: { id } as Record<string, unknown> });
+    navigate({ to: `/${id}` }); // 用 id 作為路由參數
+    // navigate({ to: "/question", state: { id } as Record<string, unknown> });
   };
 
   return (
