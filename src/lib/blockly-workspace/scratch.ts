@@ -601,11 +601,31 @@ export function initializeScratch() {
     },
   };
 
-  // javascriptGenerator.forBlock["math_arithmetic"] = function (block) {
-  //   const value =
-  //     javascriptGenerator.valueToCode(block, "VALUE", Order.MEMBER) || "''";
-  //   return [`${value}.length`, Order.MEMBER];
-  // };
+  javascriptGenerator.forBlock["scratch_math_arithmetic"] = function (block) {
+    const a = javascriptGenerator.valueToCode(block, "A", Order.ATOMIC) || "0";
+    const b = javascriptGenerator.valueToCode(block, "B", Order.ATOMIC) || "0";
+    const operator = block.getFieldValue("OP");
+
+    let code;
+    switch (operator) {
+        case "ADD":
+            code = `${a} + ${b}`;
+            break;
+        case "MINUS":
+            code = `${a} - ${b}`;
+            break;
+        case "MULTIPLY":
+            code = `${a} * ${b}`;
+            break;
+        case "DIVIDE":
+            code = `${b} !== 0 ? ${a} / ${b} : "除數不能為零"`;
+            break;
+        default:
+            code = "0";
+    }
+    return [code, Order.ADDITION];
+};
+
 
   Blockly.Blocks["scratch_length"] = {
     init: function () {
