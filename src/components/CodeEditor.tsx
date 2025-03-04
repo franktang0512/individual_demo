@@ -121,8 +121,29 @@ export function CodeEditor() {
   );
 
   const toggleEditorMode = () => {
-    setCurrentMode(currentMode === "Blockly" ? "Scratch" : "Blockly");
-  };
+    const userConfirmed = window.confirm("⚠️切換程式後，目前的程式積木將會被清除！是否確定切換？⚠️");
+    if (!userConfirmed) return; // 使用者取消切換
+
+    const workspace = workspaceRef.current?.getWorkspace();
+    if (!workspace) return;
+
+    // 1️⃣ **清理垃圾桶內的積木**
+    workspace.clearUndo(); 
+    workspace.getTopBlocks(false).forEach((block) => {
+        if (block.isDeletable()) {
+            block.dispose(true); // 確保刪除
+        }
+    });
+
+    // 2️⃣ **切換模式**
+    const newMode = currentMode === "Blockly" ? "Scratch" : "Blockly";
+    setCurrentMode(newMode);
+
+    // 3️⃣ **載入新模式的預設 Workspace（避免載入舊的）**
+    const initialWorkspace = newMode === "Blockly" ? initialBlocklyWorkspace : initialScratchWorkspace;
+    setWorkspace(newMode, initialWorkspace);
+};
+
 
   const getInitialWorkspace = useCallback((mode: "Blockly" | "Scratch") => {
     const state = useWorkspaceStore.getState();
