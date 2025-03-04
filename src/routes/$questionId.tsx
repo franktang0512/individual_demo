@@ -76,25 +76,44 @@ function ExampleContent({
     description,
     isVisible,
 }: ExampleContentProps) {
+    // return (
+    //     <div
+    //         className={`relative w-full max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${isVisible ? 'max-h-[500px] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}
+    //     >
+    //         {/* <h3 className="text-2xl font-bold text-center">{title}</h3> */}
+    //         <div className="flex justify-between mt-4 p-2  text-white rounded-md border-b">
+    //             <div className="text-center w-1/2 border-r border-gray-300">
+    //                 <p className="font-bold">輸入</p>
+    //                 <p className="mt-1 text-lg">{input}</p>
+    //             </div>
+    //             <div className="text-center w-1/2">
+    //                 <p className="font-bold">輸出</p>
+    //                 <p className="mt-1 text-lg">{output}</p>
+    //             </div>
+    //         </div>
+    //         <p className="mt-4 text-lg text-center">{description}</p>
+    //     </div>
+    // )
     return (
         <div
             className={`relative w-full max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${isVisible ? 'max-h-[500px] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}
         >
-            {/* <h3 className="text-2xl font-bold text-center">{title}</h3> */}
-            <div className="flex justify-between mt-4 p-2  text-white rounded-md border-b">
-                <div className="text-center w-1/2 border-r border-gray-300">
+            <div className="flex justify-between mt-4 p-2 text-white rounded-md border-b">
+                <div className="w-1/2 border-r border-gray-300 text-center">
                     <p className="font-bold">輸入</p>
-                    <p className="mt-1 text-lg">{input}</p>
+                    <p className="mt-1 text-lg text-left ml-2">{input}</p>
                 </div>
-                <div className="text-center w-1/2">
+                <div className="w-1/2 text-center">
                     <p className="font-bold">輸出</p>
-                    <p className="mt-1 text-lg">{output}</p>
+                    <p className="mt-1 text-lg text-left ml-2">{output}</p>
                 </div>
             </div>
-            <p className="mt-4 text-lg text-center">{description}</p>
+            <p className="mt-4 text-lg text-left">{description}</p>
         </div>
-    )
+    );
 }
+
+
 
 function IntroTab({ questionData }: { questionData: any }) {
     const [activeExample, setActiveExample] = useState<string | null>(null);
@@ -187,7 +206,7 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
                             onClick={drillClick}
                         >
                             {currentMode === "Scratch" ? (
-                                <img src= {flagIcon} alt="Start" className="w-8 h-8" />
+                                <img src={flagIcon} alt="Start" className="w-8 h-8" />
                             ) : (
                                 <span className="text-lg font-bold text-green-500 tracking-widest whitespace-nowrap">
                                     執行
@@ -383,10 +402,10 @@ function SubmitTab({ questionData }: { questionData: any }) {
                         <div key={index} className="w-full relative">
                             <button
                                 className={`flex flex-col items-center justify-center font-bold py-3 px-5 rounded-full w-full shadow-md border relative z-10 transition-all ${isEvaluated
-                                        ? group.subcase.every((sub: any) => sub.result)
-                                            ? "bg-[#28af68] text-white border-[#28af68]"
-                                            : "bg-[#ff6161] text-white border-[#ff6161]"
-                                        : "bg-white text-black border-gray-300"
+                                    ? group.subcase.every((sub: any) => sub.result)
+                                        ? "bg-[#28af68] text-white border-[#28af68]"
+                                        : "bg-[#ff6161] text-white border-[#ff6161]"
+                                    : "bg-white text-black border-gray-300"
                                     }`}
                                 onClick={() =>
                                     setActiveCase(activeCase === group.group_title ? null : group.group_title)
@@ -671,29 +690,140 @@ function Question({ id }: { id: number }) {
                     description: "新生們依序報名了編號為 7、3、9、12、1、15、6、10、4、14、9、2、9、13、8、5、11 的活動 (-1表示結束)。因此所有活動皆有新生報名。"
                 }
             ],
-            cases: [
+            "cases": [
                 {
-                    group_title: "所有活動都沒有新生報名",
-                    subcase: [
-                        { case_title: "情況一", input: "0 -1", output: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15", score: "5" },
-                        { case_title: "情況二", input: "-1", output: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15", score: "5" },
-                        { case_title: "情況三", input: "16 -1", output: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15", score: "5" },
-                        { case_title: "情況四", input: "10000 -1", output: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15", score: "5" },
-                        { case_title: "情況五", input: "0 0 0 0 0 -1", output: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15", score: "5" }
+                    "group_title": "所有活動都沒有新生報名",
+                    "subcase": [
+                        {
+                            "case_title": "情況一",
+                            "input": "0 -1",
+                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況二",
+                            "input": "-1",
+                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況三",
+                            "input": "16 -1",
+                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況四",
+                            "input": "10000 -1",
+                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況五",
+                            "input": "0 0 0 0 0 -1",
+                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+                            "score": "5"
+                        }
                     ]
                 },
                 {
-                    group_title: "部分活動有新生報名",
-                    subcase: [
-                        { case_title: "情況一", input: "13 1 4 2 6 1 8 2 3 2 14 -1", output: "5 7 9 10 11 12 15", score: "5" },
-                        { case_title: "情況二", input: "2 8 2 3 3 8 4 5 15 15 7 7 13 5 11 8 6 4 12 9 6 -1", output: "1 10 14", score: "5" }
+                    "group_title": "部分活動有新生報名",
+                    "subcase": [
+                        {
+                            "case_title": "情況一",
+                            "input": "13 1 4 2 6 1 8 2 3 2 14 -1",
+                            "output": "5 7 9 10 11 12 15",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況二",
+                            "input": "2 8 2 3 3 8 4 5 15 15 7 7 13 5 11 8 6 4 12 9 6 -1",
+                            "output": "1 10 14",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況三",
+                            "input": "5 10 9 1 1 10 8 15 10 9 4 15 1 15 10 11 9 5 3 9 -1",
+                            "output": "2 6 7 12 13 14",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況四",
+                            "input": "10 8 2 3 3 3 14 13 4 12 -1",
+                            "output": "1 5 6 7 9 11 15",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況五",
+                            "input": "8 6 4 13 10 8 12 8 9 5 2 1 2 8 9 12 8 14 2 6 -1",
+                            "output": "3 7 11 15",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況六",
+                            "input": "3 13 5 7 13 9 13 14 9 11 7 3 9 10 9 3 3 10 14 6 15 10 13 2 9 12 8 -1",
+                            "output": "1 4",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況七",
+                            "input": "15 1 15 12 5 9 9 11 3 12 7 2 4 15 -1",
+                            "output": "6 8 10 13 14",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況八",
+                            "input": "1 1 1 1 -1",
+                            "output": "2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況九",
+                            "input": "15 1 15 12 5 16 9 9 11 3 12 7 0 4 15 -1",
+                            "output": "2 6 8 10 13 14",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況十",
+                            "input": "1 4 2 6 10 11 5 15 12 13 14 8 -1",
+                            "output": "3 7 9",
+                            "score": "5"
+                        }
                     ]
                 },
                 {
-                    group_title: "所有活動都有新生報名",
-                    subcase: [
-                        { case_title: "情況一", input: "14 14 12 15 15 11 1 1 13 7 5 9 6 11 1 3 15 13 14 2 13 6 13 4 6 2 10 6 8 -1", output: "無", score: "5" },
-                        { case_title: "情況二", input: "1 3 5 7 9 8 4 6 2 10 15 13 12 14 11 -1", output: "無", score: "5" }
+                    "group_title": "所有活動都有新生報名",
+                    "subcase": [
+                        {
+                            "case_title": "情況一",
+                            "input": "14 14 12 15 15 11 1 1 13 7 5 9 6 11 1 3 15 13 14 2 13 6 13 4 6 2 10 6 8 -1",
+                            "output": "無",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況二",
+                            "input": "1 3 5 7 9 8 4 6 2 10 15 13 12 14 11 -1",
+                            "output": "無",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況三",
+                            "input": "1 1 7 6 15 12 9 3 1 5 4 1 14 4 13 2 10 6 11 7 9 7 4 15 9 8 11 4 -1",
+                            "output": "無",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況四",
+                            "input": "1000 99 123 1 1 7 6 15 12 9 3 1 5 4 1 14 4 13 2 10 6 11 7 9 7 4 15 9 8 11 4 -1",
+                            "output": "無",
+                            "score": "5"
+                        },
+                        {
+                            "case_title": "情況五",
+                            "input": "1000 99 123 1 1 7 6 15 12 9 3 1 5 4 1 14 4 13 2 10 6 11 7 9 7 4 15 9 8 11 4 -1",
+                            "output": "無",
+                            "score": "5"
+                        }
                     ]
                 }
             ]
