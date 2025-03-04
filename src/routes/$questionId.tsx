@@ -184,42 +184,73 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
 
     if (!questionData) return <p>載入中...</p>;
 
-    const drillClick = async () => {
-        try {
-            setOutput(""); // 清空輸出
-            let sandbox = new Function(`${generatedCode}; return output_result_string;`);
-            const result = sandbox();
-            setOutput(result);
-        } catch (error) {
-            console.error("執行錯誤：", error);
-            setOutput("執行錯誤！");
-        }
+    // const drillClick = async () => {
+    //     try {
+    //         setOutput(""); // 清空輸出
+    //         let sandbox = new Function(`${generatedCode}; return output_result_string;`);
+    //         const result = sandbox();
+    //         setOutput(result);
+    //     } catch (error) {
+    //         console.error("執行錯誤：", error);
+    //         setOutput("執行錯誤！");
+    //     }
+    // };
+
+
+    const drillClick = () => {
+        console.log(generatedCode);
+        setOutput("執行中...");
+        const worker = new Worker(new URL("../worker/sandboxWorker.ts", import.meta.url), { type: "module" });
+        const TIMEOUT_MS = 2000;
+        worker.postMessage({ code: generatedCode, timeout: TIMEOUT_MS });
+
+        const timer = setTimeout(() => {
+            worker.terminate();
+            setOutput("執行時間過長，可能有無窮迴圈，請檢查程式！");
+        }, TIMEOUT_MS + 100); // 保險起見，多 100ms 才強制關閉
+
+        worker.onmessage = (event) => {
+            clearTimeout(timer); // **程式正常結束時清除 timeout**
+            worker.terminate();
+            if (event.data.success) {
+                setOutput(event.data.result);
+            } else {
+                setOutput(`錯誤: ${event.data.error}`);
+            }
+        };
+
+        worker.onerror = (error) => {
+            clearTimeout(timer);
+            worker.terminate();
+            setOutput(`錯誤: ${error.message}`);
+        };
     };
 
     return (
         <TabComponentWrapper title={questionData.title}>
             <div className="w-full max-w-lg max-h-[470px] overflow-y-auto rounded-lg p-2">
                 {/* 互動區域 */}
-                <div className="flex flex-col items-start gap-4 w-full max-w-lg mt-4">
-                    <div className="flex flex-col items-center space-y-2">
-                        <button
-                            className="shadow-md px-10 py-3 bg-white border-2 border-green-500 rounded-full flex items-center justify-center w-36 h-12"
-                            onClick={drillClick}
-                        >
-                            {currentMode === "Scratch" ? (
-                                <img src={flagIcon} alt="Start" className="w-8 h-8" />
-                            ) : (
-                                <span className="text-lg font-bold text-green-500 tracking-widest whitespace-nowrap">
-                                    執行
-                                </span>
-                            )}
-                        </button>
-                        <div className="flex flex-col text-lg font-bold text-center">
-                            <span>輸出：</span>
-                            <pre className="whitespace-pre-wrap">{output}</pre>
-                        </div>
+                <div className="flex flex-col items-start space-y-2 w-full">
+                    <button
+                        className="shadow-md px-10 py-3 bg-white border-2 border-green-500 rounded-full flex items-center justify-center w-36 h-12"
+                        onClick={drillClick}
+                    >
+                        {currentMode === "Scratch" ? (
+                            <img src={flagIcon} alt="Start" className="w-8 h-8" />
+                        ) : (
+                            <span className="text-lg font-bold text-green-500 tracking-widest whitespace-nowrap">
+                                執行
+                            </span>
+                        )}
+                    </button>
+                    <div className="text-left">
+                        <span className="font-bold text-xl">輸出：</span>
+                        <pre className="text-lg font-mono leading-relaxed whitespace-pre-wrap break-words">
+                            {output}
+                        </pre>
                     </div>
                 </div>
+
 
                 {/* 顯示範例測試資料 */}
                 <div className="flex flex-col items-center gap-4 mt-4 w-full max-w-lg">
@@ -299,7 +330,7 @@ function SubmitTab({ questionData }: { questionData: any }) {
         if (currentMode === "Scratch") {
             const workspace = Blockly.getMainWorkspace();
             const greenFlagBlocks = workspace.getBlocksByType('event_whenflagclicked', false);
-        
+
             if (!(greenFlagBlocks.length === 1)) {
                 alert("Scratch 模式下，請恰好使用一個『點擊綠旗』積木！");
                 return;
