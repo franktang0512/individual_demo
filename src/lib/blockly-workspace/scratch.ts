@@ -186,7 +186,7 @@ export function initializeScratch() {
 
 
 
-  Blockly.Blocks["text"] = {
+  Blockly.Blocks["scratch_text"] = {
     init: function () {
       this.appendDummyInput()
         .appendField(new Blockly.FieldTextInput(""), "TEXT"); // 🔹 預設值 HAHA
@@ -194,6 +194,11 @@ export function initializeScratch() {
       this.setColour("#FFFFFF"); // 🔹 設定為白色，符合 Scratch 風格
     },
     // style: { hidden: true } // 🔹 讓這個積木不顯示在 Toolbox
+  };
+
+  javascriptGenerator.forBlock["scratch_text"] = function (block) {
+    const textValue = block.getFieldValue("TEXT") || "";
+    return [`"${textValue}"`, Order.ATOMIC];
   };
   // Blockly.Blocks["variable_change"] = {
   //   init: function () {
@@ -580,7 +585,7 @@ export function initializeScratch() {
     }
   };
 
-  Blockly.Blocks["math_arithmetic"] = {
+  Blockly.Blocks["scratch_math_arithmetic"] = {
     init: function () {
       this.appendValueInput("A")
         // .setCheck(["Number", "String"]);
@@ -772,7 +777,7 @@ export function initializeScratch() {
 
       // ✅ 設定 shadow block，預設為空字串
       let shadowBlock = document.createElement("shadow");
-      shadowBlock.setAttribute("type", "text");
+      shadowBlock.setAttribute("type", "scratch_text");
       let field = document.createElement("field");
       field.setAttribute("name", "TEXT");
       field.textContent = "thing"; // 🔹 預設值為 ""
@@ -973,7 +978,7 @@ export function initializeScratch() {
 
       // ✅ 設定 `ITEM` 的白色橢圓 Shadow Block（字串輸入框）
       let itemShadow = document.createElement("shadow");
-      itemShadow.setAttribute("type", "text"); // 讓 ITEM 變成文字輸入框
+      itemShadow.setAttribute("type", "scratch_text"); // 讓 ITEM 變成文字輸入框
       let itemField = document.createElement("field");
       itemField.setAttribute("name", "TEXT");
       itemField.textContent = "thing"; // 預設值
@@ -1063,7 +1068,7 @@ export function initializeScratch() {
 
       // ✅ 設定 `ITEM` 的白色橢圓 Shadow Block（文字輸入框）
       let itemShadow = document.createElement("shadow");
-      itemShadow.setAttribute("type", "text");
+      itemShadow.setAttribute("type", "scratch_text");
       let itemField = document.createElement("field");
       itemField.setAttribute("name", "TEXT");
       itemField.textContent = "新值"; // 預設值
@@ -1559,7 +1564,7 @@ export const scratchToolboxConfig = {
           inputs: {
             TEXT: {
               shadow: {
-                type: "text",
+                type: "scratch_text",
                 fields: {
                   NUM: "你的名字是?",
                 },
@@ -1578,7 +1583,7 @@ export const scratchToolboxConfig = {
           inputs: {
             TEXT: {
               shadow: {
-                type: "text",
+                type: "scratch_text",
                 fields: {
                   TEXT: "",
                 },
@@ -1679,7 +1684,7 @@ export const scratchToolboxConfig = {
         // },
         {
           kind: "block",
-          type: "math_arithmetic",
+          type: "scratch_math_arithmetic",
           inputs: {
             A: {
               shadow: {
@@ -1773,7 +1778,7 @@ export const scratchToolboxConfig = {
         },
         // {
         //   kind: "block",
-        //   type: "text",
+        //   type: "scratch_text",
         //   fields: {
         //     TEXT: "abc",
         //   },
@@ -1784,7 +1789,7 @@ export const scratchToolboxConfig = {
           inputs: {
             TEXT0: {
               shadow: {
-                type: "text",
+                type: "scratch_text",
                 fields: {
                   TEXT: "abc",
                 },
@@ -1792,7 +1797,7 @@ export const scratchToolboxConfig = {
             },
             TEXT1: {
               shadow: {
-                type: "text",
+                type: "scratch_text",
                 fields: {
                   TEXT: "def",
                 },
@@ -1806,7 +1811,7 @@ export const scratchToolboxConfig = {
           inputs: {
             STRING: {
               shadow: {
-                type: "text",
+                type: "scratch_text",
                 fields: {
                   TEXT: "abc",
                 },
@@ -1828,7 +1833,7 @@ export const scratchToolboxConfig = {
           inputs: {
             STRING1: {
               shadow: {
-                type: "text",
+                type: "scratch_text",
                 fields: {
                   TEXT: "hello",
                 },
@@ -1836,7 +1841,7 @@ export const scratchToolboxConfig = {
             },
             STRING2: {
               shadow: {
-                type: "text",
+                type: "scratch_text",
                 fields: {
                   TEXT: "el",
                 },
@@ -1850,7 +1855,7 @@ export const scratchToolboxConfig = {
           inputs: {
             VALUE: {
               shadow: {
-                type: "text",
+                type: "scratch_text",
                 fields: {
                   TEXT: "abc",
                 },
@@ -1872,7 +1877,7 @@ export const scratchToolboxConfig = {
       //     inputs: {
       //       VALUE: {
       //         shadow: {
-      //           type: "text",
+      //           type: "scratch_text",
       //           fields: {
       //             TEXT: "0",
       //           },
@@ -1886,7 +1891,7 @@ export const scratchToolboxConfig = {
       //     inputs: {
       //       VALUE: {
       //         shadow: {
-      //           type: "text",
+      //           type: "scratch_text",
       //           fields: {
       //             TEXT: "1",
       //           },

@@ -3,7 +3,27 @@ import { javascriptGenerator, Order } from "blockly/javascript";
 import { colors } from "@/lib/colors";
 
 export function initializeBlockly() {
+  // ✅ 確保 `output_result_string` 變數被初始化
+  const originalInit = javascriptGenerator.init;
+  javascriptGenerator.init = function (workspace) {
+    originalInit.call(this, workspace); // 保持原本的初始化行為
+
+    // 確保 `output_result_string` 變數只被定義一次
+    javascriptGenerator.provideFunction_("init_output_result_string", `
+      var output_result_string = "";
+    `);
+  };
+
+  // ✅ `text_print` 積木的 JavaScript 生成器
+  javascriptGenerator.forBlock["text_print"] = function (block) {
+    const msg = javascriptGenerator.valueToCode(block, "TEXT", Order.NONE) || "''";
+    return `output_result_string += ${msg} + '\\n';\n`;
+  };
 }
+
+
+
+
 
 export const blocklyTheme = Blockly.Theme.defineTheme("blockly", {
   name: "blockly",
@@ -494,20 +514,20 @@ export const blocklyToolboxConfig = {
             },
           },
         },
-        {
-          kind: "block",
-          type: "text_prompt_ext",
-          inputs: {
-            TEXT: {
-              shadow: {
-                type: "text",
-                fields: {
-                  TEXT: "請輸入文字",
-                },
-              },
-            },
-          },
-        },
+        // {
+        //   kind: "block",
+        //   type: "text_prompt_ext",
+        //   inputs: {
+        //     TEXT: {
+        //       shadow: {
+        //         type: "text",
+        //         fields: {
+        //           TEXT: "請輸入文字",
+        //         },
+        //       },
+        //     },
+        //   },
+        // },
       ],
     },
     {
