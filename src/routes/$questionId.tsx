@@ -55,7 +55,7 @@ function ExampleButton({ text, onClick, isActive }: ExampleButtonProps) {
     return (
         <button
             onClick={onClick}
-            className={`relative w-full py-4 text-xl font-bold rounded-full shadow-md transition-all border border-gray-300 z-20 ${isActive ? 'bg-[#00D1D0] text-white' : 'bg-white text-[#00D1D0]'}`}
+            className={`relative w-3/4 py-4 text-xl font-bold rounded-full shadow-md transition-all border border-gray-300 z-20 ${isActive ? 'bg-[#00D1D0] text-white' : 'bg-white text-[#00D1D0]'}`}
         >
             {text}
         </button>
@@ -150,9 +150,9 @@ function IntroTab({ questionData }: { questionData: any }) {
                 </div>
 
                 {/* 顯示範例測試資料 */}
-                <div className="flex flex-col items-center gap-4 mt-4 w-full max-w-lg">
+                <div className="flex flex-col items-center gap-4 mt-4 w-full max-w-lg justify-content">
                     {data.example_cases.map((example: any, index: number) => (
-                        <div key={index} className="w-full relative">
+                        <div key={index} className="w-full flex flex-col items-center">
                             <ExampleButton
                                 text={example.title}
                                 isActive={activeExample === example.title}
@@ -224,7 +224,7 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
                 {/* 顯示範例測試資料 */}
                 <div className="flex flex-col items-center gap-4 mt-4 w-full max-w-lg">
                     {questionData.example_cases.map((example: any, index: number) => (
-                        <div key={index} className="w-full relative">
+                        <div key={index} className="w-full flex flex-col items-center">
                             <ExampleButton
                                 text={example.title}
                                 isActive={activeExample === example.title}
@@ -418,7 +418,7 @@ function SubmitTab({ questionData }: { questionData: any }) {
                 {/* 🔹 題目測試資料 */}
                 <div className="flex flex-col items-center gap-4 mt-4 w-full">
                     {cases.map((group: any, index: number) => (
-                        <div key={index} className="w-full relative">
+                        <div key={index} className="w-3/4 relative">
                             <button
                                 className={`flex flex-col items-center justify-center font-bold py-3 px-5 rounded-full w-full shadow-md border relative z-10 transition-all ${isEvaluated
                                     ? group.subcase.every((sub: any) => sub.result)
