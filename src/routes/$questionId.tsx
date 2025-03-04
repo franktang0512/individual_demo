@@ -196,35 +196,48 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
     //     }
     // };
 
-
     const drillClick = () => {
         console.log(generatedCode);
         setOutput("執行中...");
         const worker = new Worker(new URL("../worker/sandboxWorker.ts", import.meta.url), { type: "module" });
+    
         const TIMEOUT_MS = 2000;
-        worker.postMessage({ code: generatedCode, timeout: TIMEOUT_MS });
-
+        let isTerminated = false; // 用來追蹤 Worker 是否已經終止
+    
+        // 設定超時機制
         const timer = setTimeout(() => {
-            worker.terminate();
-            setOutput("執行時間過長，可能有無窮迴圈，請檢查程式！");
-        }, TIMEOUT_MS + 100); // 保險起見，多 100ms 才強制關閉
-
+            if (!isTerminated) {
+                isTerminated = true;
+                worker.terminate();
+                setOutput("執行時間過長，可能有無窮迴圈，請檢查程式！");
+            }
+        }, TIMEOUT_MS); 
+    
+        // Worker 成功回傳結果
         worker.onmessage = (event) => {
-            clearTimeout(timer); // **程式正常結束時清除 timeout**
-            worker.terminate();
-            if (event.data.success) {
-                setOutput(event.data.result);
-            } else {
-                setOutput(`錯誤: ${event.data.error}`);
+            if (!isTerminated) { // 確保只處理一次回傳結果
+                clearTimeout(timer);
+                isTerminated = true;
+                worker.terminate();
+                setOutput(event.data.success ? event.data.result : `錯誤: ${event.data.error}`);
             }
         };
-
+    
+        // Worker 發生錯誤
         worker.onerror = (error) => {
-            clearTimeout(timer);
-            worker.terminate();
-            setOutput(`錯誤: ${error.message}`);
+            if (!isTerminated) {
+                clearTimeout(timer);
+                isTerminated = true;
+                worker.terminate();
+                setOutput(`錯誤: ${error.message}`);
+            }
         };
+    
+        // 送出程式碼到 Worker 執行
+        worker.postMessage({ code: generatedCode, timeout: TIMEOUT_MS });
     };
+    
+    
 
     return (
         <TabComponentWrapper title={questionData.title}>
