@@ -300,107 +300,112 @@ function CheckmarkIcon({ isCorrect }: { isCorrect: boolean }) {
 
 
 function SubmitTab({ questionData }: { questionData: any }) {
-    const navigate = useNavigate();
     const [activeCase, setActiveCase] = useState<string | null>(null);
     const [isEvaluated, setIsEvaluated] = useState(false);
     const [cases, setCases] = useState<any[]>(questionData?.cases || []);
-    const [score, setScore] = useState(0); // ✅ 追蹤評分百分比
-    const [numerator, setNumerator] = useState(0); // 分子
-    const [denominator, setDenominator] = useState(0); //分母
-    // const [currentMode, setCurrentMode] = useState(useWorkspaceStore.getState().currentMode); // ✅ 存到 state
+    const [score, setScore] = useState(0);
+    const [numerator, setNumerator] = useState(0);
+    const [denominator, setDenominator] = useState(0);
+    const [loading, setLoading] = useState(false); // 新增 loading 狀態
 
-    const generatedCode = useWorkspaceStore((state) => state.generatedCode); // 取得 Blockly 產生的程式碼
-    const [currentMode, setCurrentMode] = useState(useWorkspaceStore.getState().currentMode); // 先取得初始值
+    const generatedCode = useWorkspaceStore((state) => state.generatedCode);
+    const [currentMode, setCurrentMode] = useState(useWorkspaceStore.getState().currentMode);
 
     useEffect(() => {
         const unsubscribe = useWorkspaceStore.subscribe((state) => {
-            setCurrentMode(state.currentMode); // 監聽 mode 變化
+            setCurrentMode(state.currentMode);
         });
-        return () => unsubscribe(); // 清理訂閱
+        return () => unsubscribe();
     }, []);
 
-    if (!questionData) return <p>載入中...</p>;
+    const executeInWorker = async (code: string, testInputs: (string | number)[], timeout = 3000) => {
+        return new Promise((resolve) => {
+            const worker = new Worker(new URL("../worker/sandboxWorker.ts", import.meta.url));
 
-    const judgeCode = () => {
-        // console.log(generatedCode);
-        // if (!generatedCode) {
-        //     alert("請先撰寫程式碼");
-        //     return;
-        // }
+            let resolved = false;
+            const timer = setTimeout(() => {
+                resolved = true;
+                resolve(""); // 超時回傳空字串
+                worker.terminate();
+            }, timeout);
+
+            worker.onmessage = (event) => {
+                if (!resolved) {
+                    clearTimeout(timer);
+                    resolve(event.data.success ? event.data.result : "");
+                    worker.terminate();
+                }
+            };
+
+            worker.postMessage({ code, testInputs, timeout });
+        });
+    };
+
+    const judgeCode = async () => {
+        setLoading(true); // 開始測試，顯示 loader
         if (currentMode === "Scratch") {
             const workspace = Blockly.getMainWorkspace();
             const greenFlagBlocks = workspace.getBlocksByType('event_whenflagclicked', false);
-
             if (!(greenFlagBlocks.length === 1)) {
                 alert("Scratch 模式下，請恰好使用一個『點擊綠旗』積木！");
+                setLoading(false);
                 return;
             }
         }
+
         let modifiedCode = generatedCode.replace(
             /window\.prompt\([^\(\)]*\)/g,
             "(testInputs.length > 0 ? testInputs.shift() : (() => { throw new Error('輸入（詢問）次數過多'); })())"
         );
 
-        // 直接從 questionData 測試用例執行程式碼
-        const studentOutputs = cases.map((group: any) => ({
-            group_title: group.group_title,
-            subcase: group.subcase.map((sub: any) => {
-                let testInputs: (string | number)[] = [];
+        // 使用 Promise.all 等待所有測試案例結果
+        const studentOutputs = await Promise.all(
+            cases.map(async (group: any) => ({
+                group_title: group.group_title,
+                subcase: await Promise.all(
+                    group.subcase.map(async (sub: any) => {
+                        let testInputs: (string | number)[] = [];
 
-                if (typeof sub.input === "string") {
-                    sub.input
-                        .split(/[\s,]+/) // 🔹 **支援空白、換行、逗號、Tab 分隔**
-                        .map((i: string) => i.trim()) // 🔹 **去除多餘空白**
-                        .filter((i: string) => i.length > 0) // 🔹 **避免空字串**
-                        .forEach((i: string) => {
-                            const num: number = Number(i);
-                            testInputs.push(isNaN(num) ? i : num);
-                        });
-                }
+                        if (typeof sub.input === "string") {
+                            sub.input
+                                .split(/[\s,]+/)
+                                .map((i: string) => i.trim())
+                                .filter((i: string) => i.length > 0)
+                                .forEach((i: string) => {
+                                    const num: number = Number(i);
+                                    testInputs.push(isNaN(num) ? i : num);
+                                });
+                        }
 
-                let result;
-                try {
-                    const executeFunction = new Function("testInputs", `
-                        return (() => {
-                            var output_result_string = "";
-                            ${modifiedCode}
-                            return typeof output_result_string !== "undefined" ? output_result_string : "未定義 output_result_string";
-                        })();
-                    `);
-                    result = executeFunction(testInputs);
-                    // console.log(result);
-                } catch (error: any) {
-                    console.error("❌ 執行錯誤:", error);
-                    result = `錯誤: ${error.message}`;
-                }
-                const each_result = {
-                    ...sub,
-                    student_output: result,
-                    result: result.trim() === sub.output.trim() // 判斷是否正確
-                }
-                // console.log(haha);
+                        // 執行 Worker
+                        let result = "";
+                        try {
+                            result = await executeInWorker(modifiedCode, testInputs) as string;
+                        } catch (error: any) {
+                            console.error("❌ 執行錯誤:", error);
+                            result = `錯誤: ${error.message}`;
+                        }
 
-                return each_result;
-            })
-        }));
+                        return {
+                            ...sub,
+                            student_output: result,
+                            result: result.trim() === sub.output.trim(),
+                        };
+                    })
+                ),
+            }))
+        );
 
+        // 更新測試結果
         setIsEvaluated(true);
         setCases(studentOutputs);
         setScore(calculateScore(studentOutputs));
+        setLoading(false); // 測試完成，隱藏 loader
     };
 
     const calculateScore = (cases: any) => {
         let totalTests = 0;
         let correctCount = 0;
-
-        // cases.forEach((group: any) => {
-        //     group.subcase.forEach((sub: any) => {
-        //         totalTests++;
-        //         if (sub.result) correctCount++;
-        //     });
-        // });
-
-        // return totalTests === 0 ? 0 : Math.round((correctCount / totalTests) * 100);
 
         cases.forEach((group: any) => {
             group.subcase.forEach((sub: any) => {
@@ -411,42 +416,47 @@ function SubmitTab({ questionData }: { questionData: any }) {
         setNumerator(correctCount);
         setDenominator(totalTests);
 
-
         return totalTests === 0 ? 0 : Math.round((correctCount / totalTests) * 100);
     };
 
     return (
         <TabComponentWrapper title={questionData.title}>
             <div className="w-full max-w-lg max-h-[470px] overflow-y-auto rounded-lg p-2">
-
-                {/* 🔹 進度條 */}
+                {/* 進度條 */}
                 <div className="w-full max-w-lg bg-gray-200 rounded-full h-6 flex items-center relative">
                     <div
-                        className={`h-full rounded-full transition-all duration-500 ${isEvaluated ? "bg-green-500" : "bg-gray-200"
-                            }`}
+                        className={`h-full rounded-full transition-all duration-500 ${isEvaluated ? "bg-green-500" : "bg-gray-200"}`}
                         style={{ width: isEvaluated ? `${score}%` : "0%" }}
                     ></div>
                     {isEvaluated && (
                         <span className="absolute w-full text-center font-bold text-black">
                             {numerator}/{denominator}
-                            {/* {score}% */}
                         </span>
                     )}
                 </div>
 
-                {/* 🔹 按鈕區塊 */}
+                {/* 顯示loading狀態 */}
+                {loading && (
+                    <div className="fixed top-0 left-0 w-full h-full bg-gray-600 bg-opacity-50 flex items-center justify-center z-[9999] pointer-events-auto">
+                        <div className="text-white text-lg font-bold bg-black bg-opacity-70 px-6 py-4 rounded-lg">
+                            正在評分...
+                        </div>
+                    </div>
+                )}
+
+
+                {/* 按鈕區塊 */}
                 <div className="flex justify-center gap-4 mt-4">
                     <button
-                        // className="bg-[#00D1D0] text-white font-bold py-2 px-4 rounded-full border border-[#00D1D0]"
                         className="bg-white text-[#00D1D0] font-bold py-2 px-4 rounded-full border border-white shadow-md transition duration-300 hover:bg-gray-100 hover:shadow-lg"
-
-                        onClick={() => judgeCode()}
+                        onClick={judgeCode}
+                        disabled={loading} // 當測試進行中，禁用按鈕
                     >
                         進行評分
                     </button>
                 </div>
 
-                {/* 🔹 題目測試資料 */}
+                {/* 顯示測試資料 */}
                 <div className="flex flex-col items-center gap-4 mt-4 w-full">
                     {cases.map((group: any, index: number) => (
                         <div key={index} className="w-3/4 relative">
@@ -457,14 +467,9 @@ function SubmitTab({ questionData }: { questionData: any }) {
                                         : "bg-[#ff6161] text-white border-[#ff6161]"
                                     : "bg-white text-black border-gray-300"
                                     }`}
-                                onClick={() =>
-                                    setActiveCase(activeCase === group.group_title ? null : group.group_title)
-                                }
+                                onClick={() => setActiveCase(activeCase === group.group_title ? null : group.group_title)}
                             >
-                                {/* ✅ Group Title (Centered) */}
                                 <span className="text-lg">{group.group_title}</span>
-
-                                {/* ✅ Checkmarks (Smaller and in a Row) */}
                                 {isEvaluated && (
                                     <div className="flex flex-wrap justify-center items-center gap-2 mt-1">
                                         {group.subcase.map((sub: any, idx: number) => (
@@ -476,7 +481,6 @@ function SubmitTab({ questionData }: { questionData: any }) {
                         </div>
                     ))}
                 </div>
-
             </div>
         </TabComponentWrapper>
     );
