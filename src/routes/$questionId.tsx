@@ -12,7 +12,8 @@ import {
 import type { ImperativePanelGroupHandle } from 'react-resizable-panels'
 import { useLocation } from "@tanstack/react-router";
 import { useWorkspaceStore } from "@/stores/workspace";
-import flagIcon from "@/assets/icons/flag.svg"
+import flagIcon from "@/assets/icons/flag.svg";
+import * as Blockly from "blockly/core";
 
 export const Route = createFileRoute('/$questionId')({
     component: RouteComponent,
@@ -275,17 +276,35 @@ function SubmitTab({ questionData }: { questionData: any }) {
     const [score, setScore] = useState(0); // ✅ 追蹤評分百分比
     const [numerator, setNumerator] = useState(0); // 分子
     const [denominator, setDenominator] = useState(0); //分母
+    // const [currentMode, setCurrentMode] = useState(useWorkspaceStore.getState().currentMode); // ✅ 存到 state
 
     const generatedCode = useWorkspaceStore((state) => state.generatedCode); // 取得 Blockly 產生的程式碼
+    const [currentMode, setCurrentMode] = useState(useWorkspaceStore.getState().currentMode); // 先取得初始值
+
+    useEffect(() => {
+        const unsubscribe = useWorkspaceStore.subscribe((state) => {
+            setCurrentMode(state.currentMode); // 監聽 mode 變化
+        });
+        return () => unsubscribe(); // 清理訂閱
+    }, []);
 
     if (!questionData) return <p>載入中...</p>;
 
     const judgeCode = () => {
-        if (!generatedCode) {
-            alert("請先撰寫程式碼");
-            return;
+        // console.log(generatedCode);
+        // if (!generatedCode) {
+        //     alert("請先撰寫程式碼");
+        //     return;
+        // }
+        if (currentMode === "Scratch") {
+            const workspace = Blockly.getMainWorkspace();
+            const greenFlagBlocks = workspace.getBlocksByType('event_whenflagclicked', false);
+        
+            if (!(greenFlagBlocks.length === 1)) {
+                alert("Scratch 模式下，請恰好使用一個『點擊綠旗』積木！");
+                return;
+            }
         }
-
         let modifiedCode = generatedCode.replace(
             /window\.prompt\([^\(\)]*\)/g,
             "(testInputs.length > 0 ? testInputs.shift() : (() => { throw new Error('輸入（詢問）次數過多'); })())"
