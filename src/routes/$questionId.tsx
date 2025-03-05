@@ -409,6 +409,8 @@ function SubmitTab({ questionData }: { questionData: any }) {
             }))
         );
 
+        
+
         // 更新測試結果
         setIsEvaluated(true);
         setCases(studentOutputs);
