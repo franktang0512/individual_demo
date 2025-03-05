@@ -402,12 +402,14 @@ function SubmitTab({ questionData }: { questionData: any }) {
                         return {
                             ...sub,
                             student_output: result,
-                            result: result.trim() === sub.output.trim(),
+                            result: result.replace(/\s+/g, " ").trim() === sub.output.replace(/\s+/g, " ").trim(),
                         };
                     })
                 ),
             }))
         );
+
+        
 
         // 更新測試結果
         setIsEvaluated(true);
