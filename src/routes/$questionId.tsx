@@ -608,30 +608,63 @@ function RecordTab({ questionData, qid }: qProps) {
                                 //     // console.log("🔄 切換模式:", record.bs);
                                 //     // console.log("📜 載入 XML:", xmlToLoad);
                                 // }}
+                                // onClick={() => {
+                                //     const xmlToLoad = record.code ?? `<xml xmlns="https://developers.google.com/blockly/xml"></xml>`;
+                                //     const targetMode = record.bs as "Blockly" | "Scratch";
+
+                                //     if (targetMode !== "Blockly" && targetMode !== "Scratch") {
+                                //         console.error("❌ 無效的模式:", record.bs);
+                                //         return;
+                                //     }
+
+                                //     const currentMode = useWorkspaceStore.getState().currentMode;
+
+                                //     if (currentMode !== targetMode) {
+                                //         useWorkspaceStore.setState({ currentMode: targetMode });
+
+                                //         // 🔥 **稍微延遲，確保模式已經切換完成**
+                                //         setTimeout(() => {
+                                //             setRecordXMLCode(xmlToLoad);
+                                //             console.log("✅ 模式切換後載入 XML:", xmlToLoad);
+                                //         }, 50);
+                                //     } else {
+                                //         setRecordXMLCode(xmlToLoad);
+                                //     }
+                                // }}
                                 onClick={() => {
                                     const xmlToLoad = record.code ?? `<xml xmlns="https://developers.google.com/blockly/xml"></xml>`;
                                     const targetMode = record.bs as "Blockly" | "Scratch";
-
+                                
                                     if (targetMode !== "Blockly" && targetMode !== "Scratch") {
                                         console.error("❌ 無效的模式:", record.bs);
                                         return;
                                     }
-
+                                
                                     const currentMode = useWorkspaceStore.getState().currentMode;
-
+                                    const currentXML = useWorkspaceStore.getState().recordXMLCode;
+                                
                                     if (currentMode !== targetMode) {
                                         useWorkspaceStore.setState({ currentMode: targetMode });
-
+                                
                                         // 🔥 **稍微延遲，確保模式已經切換完成**
                                         setTimeout(() => {
-                                            setRecordXMLCode(xmlToLoad);
-                                            console.log("✅ 模式切換後載入 XML:", xmlToLoad);
+                                            useWorkspaceStore.setState({ recordXMLCode: "" }); // 先清空 XML，確保會觸發 React 重新渲染
+                                            setTimeout(() => {
+                                                setRecordXMLCode(xmlToLoad);
+                                                console.log("✅ 模式切換後載入 XML:", xmlToLoad);
+                                            }, 50);
                                         }, 50);
                                     } else {
-                                        setRecordXMLCode(xmlToLoad);
+                                        // **如果 XML 內容相同，先清空再重新設置**
+                                        if (currentXML === xmlToLoad) {
+                                            useWorkspaceStore.setState({ recordXMLCode: "" });
+                                            setTimeout(() => setRecordXMLCode(xmlToLoad), 50);
+                                        } else {
+                                            setRecordXMLCode(xmlToLoad);
+                                        }
                                     }
                                 }}
-
+                                
 
                             >
 
