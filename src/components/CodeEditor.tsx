@@ -1,6 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useEffect } from 'react';
 import { Workspace } from "blockly";
-import * as Blockly from "blockly/core";
+// import * as Blockly from "blockly/core";
+
+import * as Blockly from "blockly";
 import { useWorkspaceStore } from "@/stores/workspace";
 import {
   BlocklyWorkspace,
@@ -37,6 +40,12 @@ export function CodeEditor() {
   const setWorkspace = useWorkspaceStore((state) => state.setWorkspace);
   const setCurrentMode = useWorkspaceStore((state) => state.setCurrentMode);
   const setGeneratedCode = useWorkspaceStore((state) => state.setGeneratedCode);
+  const setGeneratedXMLCode = useWorkspaceStore((state) => state.setGeneratedXMLCode);
+  
+  const setRecordXMLCode = useWorkspaceStore((state) => state.setRecordXMLCode);
+  const lastanswerXML = useWorkspaceStore((state) => state.generatedXMLCode); // ✅ 取得 lastanswerXML
+  
+  const recordXML = useWorkspaceStore((state) => state.recordXMLCode); // ✅ 應該取的是 XML 資料
   const [isFunctionDialogOpen, setIsFunctionDialogOpen] = useState(false);
 
   const handleCreateFunction = useCallback(
@@ -78,16 +87,49 @@ export function CodeEditor() {
     },
     []
   );
+  // ✅ 這個函數讓 `RecordTab.tsx` 可以直接載入 XML
+  const loadXMLToWorkspace = useCallback((xmlString: string) => {
+    if (!xmlString || !workspaceRef.current) return;
+  
+    // console.log("🚀 透過 RecordTab 載入 XML 到 Blockly:", xmlString);
+    try {
+      const workspace = workspaceRef.current.getWorkspace();
+      if (workspace) {
+        workspace.clear(); // ✅ 清除舊積木
+        const xmlDom = Blockly.utils.xml.textToDom(xmlString);
+  
+        // console.log("==========in codeeditor=======");
+        // console.log(xmlDom);
+        // console.log("==========in codeeditor=======");
+  
+        Blockly.Xml.domToWorkspace(xmlDom, workspace); // ✅ 避免累加載入
+        workspace.render();  // 🔥 **強制 Blockly 重新渲染**
+        workspace.resize();  // 🔥 **確保 UI 更新**
+        workspace.markFocused(); // 🔥 **讓 Blockly UI 確認已載入新 XML**
+      }
+    } catch (error) {
+      console.error("❌ 解析 XML 失敗:", error);
+    }
+  }, []);
+
 
   const handleWorkspaceChange = useCallback(
     (workspace: Workspace) => {
       const code = javascriptGenerator.workspaceToCode(workspace);
+      
       setGeneratedCode(code);
+
+      const xmlDom = Blockly.Xml.workspaceToDom(workspace); // 轉成 DOM 物件
+      // const xmlText = Blockly.Xml.domToText(xmlDom); // 轉成 XML 字串
+      const xmlText = Blockly.Xml.domToPrettyText(xmlDom); // 轉成 XML 字串
+      
+      setGeneratedXMLCode(xmlText); // 存到 Zustand
+      
 
       // @ts-expect-error: Save generated code globally for debugging purposes
       window.generatedCode = code;
     },
-    [setGeneratedCode]
+    [setGeneratedCode,setGeneratedXMLCode]
   );
 
   const handleJsonChange = useCallback(
@@ -121,29 +163,8 @@ export function CodeEditor() {
   );
 
   const toggleEditorMode = () => {
-    const userConfirmed = window.confirm("⚠️切換程式後，目前的程式積木將會被清除！是否確定切換？⚠️");
-    if (!userConfirmed) return; // 使用者取消切換
-
-    const workspace = workspaceRef.current?.getWorkspace();
-    if (!workspace) return;
-
-    // 1️⃣ **清理垃圾桶內的積木**
-    workspace.clearUndo(); 
-    workspace.getTopBlocks(false).forEach((block) => {
-        if (block.isDeletable()) {
-            block.dispose(true); // 確保刪除
-        }
-    });
-
-    // 2️⃣ **切換模式**
-    const newMode = currentMode === "Blockly" ? "Scratch" : "Blockly";
-    setCurrentMode(newMode);
-
-    // 3️⃣ **載入新模式的預設 Workspace（避免載入舊的）**
-    const initialWorkspace = newMode === "Blockly" ? initialBlocklyWorkspace : initialScratchWorkspace;
-    setWorkspace(newMode, initialWorkspace);
-};
-
+    setCurrentMode(currentMode === "Blockly" ? "Scratch" : "Blockly");
+  };
 
   const getInitialWorkspace = useCallback((mode: "Blockly" | "Scratch") => {
     const state = useWorkspaceStore.getState();
@@ -230,6 +251,86 @@ export function CodeEditor() {
     },
     []
   );
+
+
+  useEffect(() => {
+    if (!recordXML || !workspaceRef.current) return;
+
+    // console.log("🚀 透過 RecordTab 載入新的 XML");
+
+    try {
+      const workspace = workspaceRef.current.getWorkspace();
+      if (workspace) {
+        workspace.clear(); // ✅ 清除當前積木，確保載入乾淨
+        setWorkspace("Blockly", {}); // ✅ 清空記錄，防止干擾
+        setWorkspace("Scratch", {});
+
+        const xmlDom = Blockly.utils.xml.textToDom(recordXML);
+        // console.log("這是code街道的",recordXML);
+        Blockly.Xml.domToWorkspace(xmlDom, workspace);
+        
+      }
+    } catch (error) {
+      console.error("❌ 解析 recordXML 失敗:", error);
+    }
+  }, [recordXML]); // ✅ **只有點選 RecordTab 按鈕時才執行**
+
+
+    useEffect(() => {
+    return () => {
+      // console.log("🚀 離開 Question 頁面，清除 CodeEditor 狀態");
+  
+      const workspace = workspaceRef.current?.getWorkspace();
+      if (workspace) {
+        workspace.clear(); // ✅ 清除 Blockly 畫布
+      }
+  
+      // ✅ 清空存儲的 XML 和代碼，防止返回時載入
+      // setGeneratedCode("");
+      // setGeneratedXMLCode("");
+      // setRecordXMLCode("");
+      setWorkspace("Blockly", {});
+      setWorkspace("Scratch", {});
+  
+      // console.log("✅ Blockly 狀態已清除");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!lastanswerXML || !workspaceRef.current) return;
+
+    // console.log("🚀 載入 lastanswerXML 到 Blockly");
+
+
+    try {
+      const workspace = workspaceRef.current.getWorkspace();
+      // console.log("1");
+
+      if (workspace) {
+        // console.log("2");
+        workspace.clear(); // ✅ 先清除舊工作區
+
+
+
+        setWorkspace("Blockly", {}); // ⚡ 設為空物件，防止切換時恢復
+        setWorkspace("Scratch", {}); // ⚡ 也清空 Scratch，確保不會被載入
+        // console.log("3");
+        const xmlDom = Blockly.utils.xml.textToDom(lastanswerXML);
+        // console.log("4");
+        Blockly.Xml.domToWorkspace(xmlDom, workspace); // ✅ 載入新的 XML
+        // console.log("5");
+        // 重新產生 JavaScript 程式碼
+        // const generatedCode = Blockly.JavaScript.workspaceToCode(workspace);
+        // console.log(generatedCode);
+        // setGeneratedCode(generatedCode);
+      }
+    } catch (error) {
+      console.error("❌ 解析 XML 失敗:", error);
+    }
+  }, []/*[lastanswerXML]*/); // 🔥 監聽 lastanswerXML 變化
+
+
+
 
   return (
     <div className="relative h-full w-full">

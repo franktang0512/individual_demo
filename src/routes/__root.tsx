@@ -23,7 +23,7 @@ const RootComponent: React.FC = () => {
     <div id="app-wrapper" className="mx-auto flex h-dvh max-h-[1200px] max-w-[2000px] flex-col">
       {/* <header id="app-header" className="flex justify-center items-center px-12 py-6 relative"> */}
       <header id="app-header" className="flex items-center px-12 py-6 relative">
-        {/* 左側標題 + 任務列表按鈕 */}
+        {/* 左側標題 + 題目列表按鈕 */}
         <div className="flex items-center gap-4 flex-shrink-0">
           <h1 className="text-xl font-semibold whitespace-nowrap">
             113學年度科技教育創意實作競賽【資訊科技組示範賽】
@@ -44,7 +44,7 @@ const RootComponent: React.FC = () => {
                 alt="Task List Icon"
                 className="w-5 h-5 mr-2"
               />
-              <span className="font-bold">任務列表</span>
+              <span className="font-bold">題目列表</span>
             </Link>
           )}
         </div>

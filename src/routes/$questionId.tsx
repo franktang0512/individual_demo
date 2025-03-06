@@ -55,7 +55,7 @@ function ExampleButton({ text, onClick, isActive }: ExampleButtonProps) {
     return (
         <button
             onClick={onClick}
-            className={`relative w-3/4 py-4 text-xl font-bold rounded-full shadow-md transition-all border border-gray-300 z-20 ${isActive ? 'bg-[#00D1D0] text-white' : 'bg-white text-[#00D1D0]'}`}
+            className={`relative w-[100%] py-4 text-xl font-bold rounded-full shadow-md transition-all border border-gray-300 z-20 ${isActive ? 'bg-[#00D1D0] text-white' : 'bg-white text-[#00D1D0]'}`}
         >
             {text}
         </button>
@@ -77,36 +77,19 @@ function ExampleContent({
     description,
     isVisible,
 }: ExampleContentProps) {
-    // return (
-    //     <div
-    //         className={`relative w-full max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${isVisible ? 'max-h-[500px] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}
-    //     >
-    //         {/* <h3 className="text-2xl font-bold text-center">{title}</h3> */}
-    //         <div className="flex justify-between mt-4 p-2  text-white rounded-md border-b">
-    //             <div className="text-center w-1/2 border-r border-gray-300">
-    //                 <p className="font-bold">輸入</p>
-    //                 <p className="mt-1 text-lg">{input}</p>
-    //             </div>
-    //             <div className="text-center w-1/2">
-    //                 <p className="font-bold">輸出</p>
-    //                 <p className="mt-1 text-lg">{output}</p>
-    //             </div>
-    //         </div>
-    //         <p className="mt-4 text-lg text-center">{description}</p>
-    //     </div>
-    // )
     return (
         <div
-            className={`relative w-full max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${isVisible ? 'max-h-[500px] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}
+            className={`relative w-[90%] max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${isVisible ? 'max-h-[500px] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}
         >
             <div className="flex justify-between mt-4 p-2 text-white rounded-md border-b">
                 <div className="w-1/2 border-r border-gray-300 text-center">
                     <p className="font-bold">輸入</p>
-                    <p className="mt-1 text-lg text-left ml-2">{input}</p>
+                    {/* <p className="mt-1 text-lg text-left ml-2">{input}</p> */}
+                    <p className="mt-1 text-lg ml-2">{input}</p>
                 </div>
                 <div className="w-1/2 text-center">
                     <p className="font-bold">輸出</p>
-                    <p className="mt-1 text-lg text-left ml-2">{output}</p>
+                    <p className="mt-1 text-lg ml-2">{output}</p>
                 </div>
             </div>
             <p className="mt-4 text-lg text-left">{description}</p>
@@ -130,7 +113,7 @@ function IntroTab({ questionData }: { questionData: any }) {
 
     return (
         <TabComponentWrapper title={data.title}>
-            <div className="w-full max-w-lg max-h-[500px] overflow-y-auto rounded-lg p-2">
+            <div className="w-full max-w-lg max-h-full overflow-y-auto rounded-lg p-2">
                 {/* 顯示題目敘述 */}
                 <div className="w-full px-4 text-xl">
                     {data.statements.map((statement: any, index: number) => (
@@ -195,15 +178,15 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
             setOutput("執行錯誤！");
         }
     };
-
+    //worker沒有瀏覽器 所以有windows prompt的話都會報錯，因此使用者如果程式crash的話自己要承擔
     // const drillClick = () => {
     //     console.log(generatedCode);
     //     setOutput("執行中...");
     //     const worker = new Worker(new URL("../worker/sandboxWorker.ts", import.meta.url), { type: "module" });
-    
+
     //     const TIMEOUT_MS = 2000;
     //     let isTerminated = false; // 用來追蹤 Worker 是否已經終止
-    
+
     //     // 設定超時機制
     //     const timer = setTimeout(() => {
     //         if (!isTerminated) {
@@ -211,8 +194,8 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
     //             worker.terminate();
     //             setOutput("執行時間過長，可能有無窮迴圈，請檢查程式！");
     //         }
-    //     }, TIMEOUT_MS); 
-    
+    //     }, TIMEOUT_MS);
+
     //     // Worker 成功回傳結果
     //     worker.onmessage = (event) => {
     //         if (!isTerminated) { // 確保只處理一次回傳結果
@@ -222,7 +205,7 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
     //             setOutput(event.data.success ? event.data.result : `錯誤: ${event.data.error}`);
     //         }
     //     };
-    
+
     //     // Worker 發生錯誤
     //     worker.onerror = (error) => {
     //         if (!isTerminated) {
@@ -232,16 +215,16 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
     //             setOutput(`錯誤: ${error.message}`);
     //         }
     //     };
-    
+
     //     // 送出程式碼到 Worker 執行
     //     worker.postMessage({ code: generatedCode, timeout: TIMEOUT_MS });
     // };
-    
-    
+
+
 
     return (
         <TabComponentWrapper title={questionData.title}>
-            <div className="w-full max-w-lg max-h-[470px] overflow-y-auto rounded-lg p-2">
+            <div className="w-full max-w-lg max-h-full overflow-y-auto rounded-lg p-2">
                 {/* 互動區域 */}
                 <div className="flex flex-col items-start space-y-2 w-full">
                     <button
@@ -256,9 +239,9 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
                             </span>
                         )}
                     </button>
-                    <div className="text-left">
+                    <div className="text-left ">
                         <span className="font-bold text-xl">輸出：</span>
-                        <pre className="text-lg font-mono leading-relaxed whitespace-pre-wrap break-words">
+                        <pre className="max-h-[400px] w-full overflow-y-auto text-lg font-mono leading-relaxed whitespace-pre-wrap break-words max-h-[500px]">
                             {output}
                         </pre>
                     </div>
@@ -312,7 +295,7 @@ function CheckmarkIcon({ isCorrect }: { isCorrect: boolean }) {
 
 
 
-function SubmitTab({ questionData }: { questionData: any }) {
+function SubmitTab({ questionData, qid }: qProps) {
     const [activeCase, setActiveCase] = useState<string | null>(null);
     const [isEvaluated, setIsEvaluated] = useState(false);
     const [cases, setCases] = useState<any[]>(questionData?.cases || []);
@@ -320,10 +303,13 @@ function SubmitTab({ questionData }: { questionData: any }) {
     const [numerator, setNumerator] = useState(0);
     const [denominator, setDenominator] = useState(0);
     const [loading, setLoading] = useState(false); // 新增 loading 狀態
+    // console.log(questionData);
 
     const generatedCode = useWorkspaceStore((state) => state.generatedCode);
     const [currentMode, setCurrentMode] = useState(useWorkspaceStore.getState().currentMode);
-
+    const generatedXMLCode = useWorkspaceStore((state) => state.generatedXMLCode); // 取得 Blockly 產生的程式碼
+    const storedData = localStorage.getItem("stuansers");
+    var parsedData = storedData ? JSON.parse(storedData) : { questions: {} };
     useEffect(() => {
         const unsubscribe = useWorkspaceStore.subscribe((state) => {
             setCurrentMode(state.currentMode);
@@ -371,6 +357,41 @@ function SubmitTab({ questionData }: { questionData: any }) {
             "(testInputs.length > 0 ? testInputs.shift() : (() => { throw new Error('輸入（詢問）次數過多'); })())"
         );
 
+        // const timestamp = new Date().toISOString();
+        // const timestamp = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
+        // const now = new Date();
+        // const taiwanTime = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 轉成 UTC+8
+        // const timestamp = taiwanTime.toISOString().slice(11, 19); // 只取 "hh:mm:ss"
+        const timestamp = new Date().toISOString();
+
+        // const [currentMode, setCurrentMode] = useState(useWorkspaceStore.getState().currentMode);
+        // 如果當前題目還沒有紀錄，初始化為空陣列
+        if (!parsedData.questions[qid]) {
+            parsedData.questions[qid] = [];
+        }
+        // console.log(generatedXMLCode);
+        // let modifiedCode = generatedCode.replace(
+
+        // 存入當前程式碼，並維護歷史紀錄
+        parsedData.questions[qid].push({
+            time: timestamp,
+            bs: currentMode,
+            code: generatedXMLCode,
+            score: 0,
+            numerator: 0,
+            denominator: 0
+        });
+
+        // 將更新後的紀錄存回 LocalStorage
+        localStorage.setItem("stuansers", JSON.stringify(parsedData));
+        // const parser = new DOMParser();
+        // const xmlDoc = parser.parseFromString(generatedXMLCode, "text/xml");
+
+        // console.log(xmlDoc); // 這是 XML 轉換後的物件
+
+        // console.log(JSON.parse(storedData as string)); // ✅ 以物件格式印出
+
+
         // 使用 Promise.all 等待所有測試案例結果
         const studentOutputs = await Promise.all(
             cases.map(async (group: any) => ({
@@ -402,19 +423,27 @@ function SubmitTab({ questionData }: { questionData: any }) {
                         return {
                             ...sub,
                             student_output: result,
-                            result: result.replace(/\s+/g, " ").trim() === sub.output.replace(/\s+/g, " ").trim(),
+                            result: result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim()
                         };
                     })
                 ),
             }))
         );
 
-        
+
 
         // 更新測試結果
         setIsEvaluated(true);
         setCases(studentOutputs);
         setScore(calculateScore(studentOutputs));
+        // 將當前程式碼成績紀錄下來
+
+        // parsedData.questions[qid][parsedData.questions[qid].length - 1].numerator = numerator;
+        // parsedData.questions[qid][parsedData.questions[qid].length - 1].denominator = denominator;
+
+        // 將更新後的紀錄存回 LocalStorage
+
+
         setLoading(false); // 測試完成，隱藏 loader
     };
 
@@ -430,25 +459,38 @@ function SubmitTab({ questionData }: { questionData: any }) {
         });
         setNumerator(correctCount);
         setDenominator(totalTests);
-
+        const calculatedScore = Math.round((correctCount / totalTests) * 100);
+        parsedData.questions[qid][parsedData.questions[qid].length - 1].score = calculatedScore;
+        parsedData.questions[qid][parsedData.questions[qid].length - 1].numerator = correctCount;
+        parsedData.questions[qid][parsedData.questions[qid].length - 1].denominator = totalTests;
+        localStorage.setItem("stuansers", JSON.stringify(parsedData));
+        console.log(parsedData);
         return totalTests === 0 ? 0 : Math.round((correctCount / totalTests) * 100);
     };
 
     return (
         <TabComponentWrapper title={questionData.title}>
-            <div className="w-full max-w-lg max-h-[470px] overflow-y-auto rounded-lg p-2">
+            <div className="w-full max-w-lg h-full overflow-y-auto rounded-lg p-2">
                 {/* 進度條 */}
                 <div className="w-full max-w-lg bg-gray-200 rounded-full h-6 flex items-center relative">
                     <div
-                        className={`h-full rounded-full transition-all duration-500 ${isEvaluated ? "bg-green-500" : "bg-gray-200"}`}
-                        style={{ width: isEvaluated ? `${score}%` : "0%" }}
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                            width: isEvaluated ? `${score}%` : "0%",
+                            backgroundColor: isEvaluated ? "#28af68ff" : undefined // ✅ 設定顏色
+                        }}
                     ></div>
                     {isEvaluated && (
-                        <span className="absolute w-full text-center font-bold text-black">
+                        <span
+                            className="absolute w-full text-center font-bold"
+                            style={{ color: score >= 60 ? "white" : "black" }} // ✅ 壓到進度條就變白
+                        >
                             {numerator}/{denominator}
                         </span>
                     )}
                 </div>
+
+
 
                 {/* 顯示loading狀態 */}
                 {loading && (
@@ -467,7 +509,7 @@ function SubmitTab({ questionData }: { questionData: any }) {
                         onClick={judgeCode}
                         disabled={loading} // 當測試進行中，禁用按鈕
                     >
-                        進行評分
+                        儲存/評分
                     </button>
                 </div>
 
@@ -476,21 +518,22 @@ function SubmitTab({ questionData }: { questionData: any }) {
                     {cases.map((group: any, index: number) => (
                         <div key={index} className="w-3/4 relative">
                             <button
-                                className={`flex flex-col items-center justify-center font-bold py-3 px-5 rounded-full w-full shadow-md border relative z-10 transition-all ${isEvaluated
+                                className={`flex flex-col items-center justify-center font-bold  px-5 rounded-full w-full shadow-md border relative z-10 transition-all ${isEvaluated
                                     ? group.subcase.every((sub: any) => sub.result)
-                                        ? "bg-[#28af68] text-white border-[#28af68]"
-                                        : "bg-[#ff6161] text-white border-[#ff6161]"
-                                    : "bg-white text-black border-gray-300"
+                                        ? "bg-[#28af68] text-white border-[#28af68] py-1"
+                                        : "bg-[#ff6161] text-white border-[#ff6161] py-1"
+                                    : "bg-white text-black border-gray-300 py-3"
                                     }`}
                                 onClick={() => setActiveCase(activeCase === group.group_title ? null : group.group_title)}
                             >
                                 <span className="text-lg">{group.group_title}</span>
                                 {isEvaluated && (
-                                    <div className="flex flex-wrap justify-center items-center gap-2 mt-1">
+                                    <div className="grid grid-cols-5 gap-1 mt-1 justify-items-center">
                                         {group.subcase.map((sub: any, idx: number) => (
                                             <CheckmarkIcon key={idx} isCorrect={sub.result === true} />
                                         ))}
                                     </div>
+
                                 )}
                             </button>
                         </div>
@@ -502,24 +545,143 @@ function SubmitTab({ questionData }: { questionData: any }) {
 }
 
 
-function RecordTab({ questionData }: { questionData: any }) {
+// function RecordTab({ questionData, qid }: qProps) {
+//     return (
+//         <TabComponentWrapper title={questionData.title}>
+//             <div className="w-full max-w-lg max-h-[470px] overflow-y-auto rounded-lg p-2">
+//                 <div className="flex flex-col gap-2">
+//                     <p className="text-center text-gray-500">比賽期間提供作答歷程記錄</p>
+//                 </div>
+//             </div>
+//         </TabComponentWrapper>
+//     );
+// }
+function RecordTab({ questionData, qid }: qProps) {
+    const setRecordXMLCode = useWorkspaceStore((state) => state.setRecordXMLCode);
+    const [studentAnswers, setStudentAnswers] = useState<
+        { time: string; bs: string; code: string | null; score: number; numerator: number; denominator: number }[]
+    >([]);
+
+    useEffect(() => {
+        // 讀取 LocalStorage
+        const storedData = localStorage.getItem("stuansers");
+        const parsedData = storedData ? JSON.parse(storedData) : { questions: {} };
+
+        // 取得該題的作答紀錄
+        if (parsedData.questions[qid]) {
+            setStudentAnswers(parsedData.questions[qid]);
+        }
+    }, [qid]); // 當 qid 改變時重新載入紀錄
+
+    // 按時間排序，最新的在最上方
+
+
+    const sortedRecords = [...studentAnswers]
+        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .map(record => ({
+            ...record,
+            displayTime: new Date(record.time).toLocaleTimeString("zh-TW", { timeZone: "Asia/Taipei", hour12: false })
+        }));
+
     return (
         <TabComponentWrapper title={questionData.title}>
-            <div className="w-full max-w-lg max-h-[470px] overflow-y-auto rounded-lg p-2">
-                <div className="flex flex-col gap-2">
-                    <p className="text-center text-gray-500">比賽期間提供作答歷程記錄</p>
+            <div className="w-full max-w-lg h-full overflow-y-auto rounded-lg p-3  ">
+                <div className="flex flex-col gap-3 max-h-[800px] overflow-y-auto">
+                    {sortedRecords.length === 0 ? (
+                        <p className="text-center text-gray-500 text-lg py-4">尚無作答紀錄</p>
+                    ) : (
+                        sortedRecords.map((record, index) => (
+                            <button
+                                key={index}
+                                className="w-full flex items-center gap-4 bg-white border border-gray-300 rounded-full shadow-md px-5 py-4 transition-all duration-300 hover:bg-gray-100 active:bg-gray-200"
+                                // onClick={() => {
+                                //     const xmlToLoad = record.code ?? `<xml xmlns="https://developers.google.com/blockly/xml"></xml>`;
+
+                                //     // ✅ 設定回之前的 Blockly 或 Scratch 模式
+                                //     if (record.bs === "Scratch") {
+                                //         useWorkspaceStore.setState({ currentMode: "Scratch" });
+                                //     } else {
+                                //         useWorkspaceStore.setState({ currentMode: "Blockly" });
+                                //     }
+
+                                //     setRecordXMLCode(xmlToLoad);
+                                //     // console.log("🔄 切換模式:", record.bs);
+                                //     // console.log("📜 載入 XML:", xmlToLoad);
+                                // }}
+                                onClick={() => {
+                                    const xmlToLoad = record.code ?? `<xml xmlns="https://developers.google.com/blockly/xml"></xml>`;
+                                    const targetMode = record.bs as "Blockly" | "Scratch";
+
+                                    if (targetMode !== "Blockly" && targetMode !== "Scratch") {
+                                        console.error("❌ 無效的模式:", record.bs);
+                                        return;
+                                    }
+
+                                    const currentMode = useWorkspaceStore.getState().currentMode;
+
+                                    if (currentMode !== targetMode) {
+                                        useWorkspaceStore.setState({ currentMode: targetMode });
+
+                                        // 🔥 **稍微延遲，確保模式已經切換完成**
+                                        setTimeout(() => {
+                                            setRecordXMLCode(xmlToLoad);
+                                            console.log("✅ 模式切換後載入 XML:", xmlToLoad);
+                                        }, 50);
+                                    } else {
+                                        setRecordXMLCode(xmlToLoad);
+                                    }
+                                }}
+
+
+                            >
+
+                                {/* ✅ 顯示台灣時間，風格一致 */}
+                                <span className="text-lg font-bold w-32 text-gray-700">
+                                    {/* {record.time} */}
+                                    {record.displayTime}
+                                </span>
+
+                                {/* ✅ 進度條 UI 調整，風格統一 */}
+                                <div className="w-full bg-gray-200 rounded-full h-6 relative overflow-hidden">
+                                    <div
+                                        className="h-full rounded-full transition-all duration-500"
+                                        style={{
+                                            width: `${record.score}%`,
+                                            // width: `${35}%`,
+                                            backgroundColor: "#28af68",
+                                        }}
+                                    ></div>
+                                    <span
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 font-bold"
+                                        style={{
+                                            color: record.score >= 35 ? "white" : "black",
+                                        }}
+                                    >
+                                        {record.numerator}/{record.denominator}
+                                    </span>
+                                </div>
+                            </button>
+                        ))
+                    )}
                 </div>
             </div>
         </TabComponentWrapper>
     );
 }
 
+
+
+
+
 const mapLayouts = {
     1: [70, 30],
     2: [65, 35],
     3: [60, 40],
 }
-
+interface qProps {
+    questionData: any;
+    qid: number; // 🔥 這裡新增 qid
+}
 function Question({ id }: { id: number }) {
     const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
     // const location = useLocation() as { state: Record<string, unknown> }; // ✨
@@ -899,6 +1061,10 @@ function Question({ id }: { id: number }) {
         }
     };
 
+    const setCurrentMode = useWorkspaceStore((state) => state.setCurrentMode); // ✅ 獲取設定模式的函數
+    useEffect(() => {
+        setCurrentMode("Scratch");
+    }, []); // `id` 改變時重新設定題目
     const resetWorkspaces = useWorkspaceStore((state) => state.resetWorkspaces);
     useEffect(() => {
         resetWorkspaces();
@@ -910,23 +1076,27 @@ function Question({ id }: { id: number }) {
         return [
             {
                 value: 'tab1',
-                title: '任務說明',
+                // title: '任務說明',
+                title: '題目說明',
                 content: <IntroTab questionData={questionData} />,
             },
             {
                 value: 'tab2',
-                title: '任務演練',
+                // title: '任務演練',                                
+                title: '自行測試',
                 content: <CodeDrillTab questionData={questionData} />,
             },
             {
                 value: 'tab3',
-                title: '任務挑戰',
-                content: <SubmitTab questionData={questionData} />,
+                // title: '任務挑戰',                
+                title: '評分',
+                content: <SubmitTab questionData={questionData} qid={id} />,
             },
             {
                 value: 'tab4',
-                title: '挑戰紀錄',
-                content: <RecordTab questionData={questionData} />,
+                // title: '挑戰紀錄',
+                title: '評分紀錄',
+                content: <RecordTab questionData={questionData} qid={id} />,
             },
         ];
     }, [questionData]);  // 🔥 `questionData` 變更時，`tabItems` 會重新計算
