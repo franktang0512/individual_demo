@@ -18,6 +18,7 @@ import {
   scratchTheme,
   scratchToolboxConfig,
   initialScratchWorkspace,
+  variableFlyoutCallback,
   listFlyoutCallback,
   functionFlyoutCallback,
 } from "@/lib/blockly-workspace/scratch";
@@ -88,7 +89,7 @@ export function CodeEditor() {
     []
   );
   useEffect(() => {
-    initiateBlocklyWorkspace(currentMode); // ✅ 根據模式載入對應的環境
+    initiateBlocklyWorkspace(); // ✅ 根據模式載入對應的環境
   }, [currentMode]); // 🔥 當 `currentMode` 變更時，重新初始化 Blockly 或 Scratch
   // ✅ 這個函數讓 `RecordTab.tsx` 可以直接載入 XML
   const loadXMLToWorkspace = useCallback((xmlString: string) => {
@@ -221,38 +222,51 @@ export function CodeEditor() {
   const handleWorkspaceInject = useCallback(
     (workspace: Blockly.WorkspaceSvg) => {
       if (currentMode === "Scratch") {
-        // On scratch mode, register custom flyout and button for lists and functions
+        // On scratch mode, register custom flyout and button for variables, lists and functions
+        workspace.registerToolboxCategoryCallback(
+          "SCRATCH_VARIABLE",
+          variableFlyoutCallback,
+        );
+        workspace.registerButtonCallback("CREATE_SCRATCH_VARIABLE", () => {
+          Blockly.Variables.createVariableButtonHandler(
+            workspace,
+            undefined,
+            "",
+          );
+        });
         workspace.registerToolboxCategoryCallback(
           "SCRATCH_LIST",
-          listFlyoutCallback
+          listFlyoutCallback,
         );
         workspace.registerButtonCallback("CREATE_SCRATCH_LIST", () => {
           Blockly.Variables.createVariableButtonHandler(
             workspace,
             undefined,
-            "list"
+            "list",
           );
         });
         workspace.registerToolboxCategoryCallback(
           "SCRATCH_FUNCTION",
-          functionFlyoutCallback
+          functionFlyoutCallback,
         );
         workspace.registerButtonCallback("CREATE_SCRATCH_FUNCTION", () => {
           setIsFunctionDialogOpen(true);
         });
       }
     },
-    [currentMode]
+    [currentMode],
   );
 
-  const handleWorkspaceDispose = useCallback(
+const handleWorkspaceDispose = useCallback(
     (workspace: Blockly.WorkspaceSvg) => {
+      workspace.removeToolboxCategoryCallback("SCRATCH_VARIABLE");
+      workspace.removeButtonCallback("CREATE_SCRATCH_VARIABLE");
       workspace.removeToolboxCategoryCallback("SCRATCH_LIST");
       workspace.removeButtonCallback("CREATE_SCRATCH_LIST");
       workspace.removeToolboxCategoryCallback("SCRATCH_FUNCTION");
       workspace.removeButtonCallback("CREATE_SCRATCH_FUNCTION");
     },
-    []
+    [],
   );
 
 

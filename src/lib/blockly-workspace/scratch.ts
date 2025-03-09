@@ -19,7 +19,7 @@ export function variableFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
   // Button to create a new variable
   const button = document.createElement("button");
   button.setAttribute("text", "建立變數");
-  button.setAttribute("callbackKey", "CREATE_VARIABLE"); // ✅ 確保使用 Blockly 內建變數創建
+  button.setAttribute("callbackKey", "CREATE_SCRATCH_VARIABLE"); // ✅ 確保使用 Blockly 內建變數創建
   xmlList.push(button);
 
   // 取得目前的變數列表
@@ -27,9 +27,9 @@ export function variableFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
 
   if (variables.length > 0) {
     const blockTypes = [
-      "variables_set",
-      "variables_get",
-      "variables_change",
+      "scratch_variables_set",      
+      "scratch_variables_change",
+      "scratch_variables_get",
     ];
 
     for (const variable of variables) {
@@ -250,7 +250,7 @@ export function initializeScratch() {
     }\n
     `;
     return code;
-};
+  };
 
 
   // 定義積木：詢問的答案
@@ -300,7 +300,7 @@ export function initializeScratch() {
     // return code;
 
     var msg = javascriptGenerator.valueToCode(block, 'TEXT', Order.NONE) || '\'\'';
-    var code = 'output_result_string += ' +String(msg)  + ';\n' + 'output_result_string += \'\\n\' ;\n'
+    var code = 'output_result_string += ' + String(msg) + ';\n' + 'output_result_string += \'\\n\' ;\n'
     return code;
   };
 
@@ -609,23 +609,23 @@ export function initializeScratch() {
 
     let code;
     switch (operator) {
-        case "ADD":
-            code = `${a} + ${b}`;
-            break;
-        case "MINUS":
-            code = `${a} - ${b}`;
-            break;
-        case "MULTIPLY":
-            code = `${a} * ${b}`;
-            break;
-        case "DIVIDE":
-            code = `${b} !== 0 ? ${a} / ${b} : "除數不能為零"`;
-            break;
-        default:
-            code = "0";
+      case "ADD":
+        code = `${a} + ${b}`;
+        break;
+      case "MINUS":
+        code = `${a} - ${b}`;
+        break;
+      case "MULTIPLY":
+        code = `${a} * ${b}`;
+        break;
+      case "DIVIDE":
+        code = `${b} !== 0 ? ${a} / ${b} : "除數不能為零"`;
+        break;
+      default:
+        code = "0";
     }
     return [code, Order.ADDITION];
-};
+  };
 
 
   Blockly.Blocks["scratch_length"] = {
@@ -693,13 +693,13 @@ export function initializeScratch() {
   //     this.setHelpUrl("");
   //   },
   // };
-  Blockly.Blocks["variables_set"] = {
+  Blockly.Blocks["scratch_variables_set"] = {
     init: function () {
       this.appendDummyInput()
         .appendField("變數")
         .appendField(new Blockly.FieldVariable("變數名稱", undefined, [""]), "VAR")
         .appendField("設為");
-  
+
       // ✅ 建立 shadow block
       let shadowBlock = document.createElement("shadow");
       shadowBlock.setAttribute("type", "scratch_text"); // ✅ 自定義 Scratch 文字輸入框
@@ -707,11 +707,11 @@ export function initializeScratch() {
       field.setAttribute("name", "TEXT"); // ✅ `scratch_text` 的正確 field 名稱應該是 TEXT
       field.textContent = "0"; // ✅ 預設為 0
       shadowBlock.appendChild(field);
-  
+
       this.appendValueInput("VALUE")
         .setCheck(["Number", "String"]) // ✅ 允許數字 & 文字
         .connection.setShadowDom(shadowBlock); // ✅ 設定 shadow block
-  
+
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -720,22 +720,22 @@ export function initializeScratch() {
       this.setHelpUrl("");
     },
   };
-  
-  javascriptGenerator.forBlock["variables_set"] = function (block) {
+
+  javascriptGenerator.forBlock["scratch_variables_set"] = function (block) {
     var argument0 = javascriptGenerator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
     var varName = javascriptGenerator.nameDB_?.getName(
       block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME
     );
-  
+
     // ✅ 嘗試將 argument0 轉為數字，如果是純數字則轉型
     var code = `${varName} = (isNaN(${argument0}) ? ${argument0} : Number(${argument0}));\n`;
-  
+
     return code;
   };
-  
+
 
   //不知道為甚麼要用math_change來實作variables_change但就先這樣好了不然好煩
-  Blockly.Blocks["math_change"] = {
+  Blockly.Blocks["scratch_variables_change"] = {
     init: function () {
 
 
@@ -769,13 +769,37 @@ export function initializeScratch() {
     },
   };
 
-  javascriptGenerator.forBlock["math_change"] = function (block) {
+  javascriptGenerator.forBlock["scratch_variables_change"] = function (block) {
     var argument0 = javascriptGenerator.valueToCode(block, 'DELTA', Order.ADDITION) || '1';
     var varName = javascriptGenerator.nameDB_?.getName(
       block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME);
     return varName + ' = (typeof ' + varName + ' == \'number\' ? ' + varName +
       ' : 0) + ' + argument0 + ';\n';
   };
+
+
+  Blockly.Blocks["scratch_variables_get"] = {
+    init: function () {
+      this.appendDummyInput()
+        .appendField(
+          new Blockly.FieldVariable("變數名稱", undefined, [""]),
+          "VAR")
+      this.setInputsInline(true);
+      this.setOutput(true, null);
+      this.setColour("#FF9900"); 
+      // this.setColour("%{BKY_VARIABLES_HUE}");
+      this.setTooltip("");
+      this.setHelpUrl("");
+
+    },
+  };
+  javascriptGenerator.forBlock["scratch_variables_get"] = function (block) {
+    var varName = javascriptGenerator.nameDB_?.getName(
+      block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME) || 'undefined_var';
+    return [varName, Order.ATOMIC]; // 確保回傳值符合 [string, number] 的型別要求
+  };
+  
+  
 
 
   // Get list (reporter)
@@ -1924,7 +1948,7 @@ export const scratchToolboxConfig = {
     {
       kind: "category",
       name: "變數",
-      custom: "VARIABLE",
+      custom: "SCRATCH_VARIABLE",
       categorystyle: "variable_category",
       // contents: [
       //   {
