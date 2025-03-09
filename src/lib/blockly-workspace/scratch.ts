@@ -1283,15 +1283,15 @@ export function initializeScratch() {
           type === "NumberString" ? ["Number", "String"] : "Boolean"
         );
 
-        const workspace = this.workspace;
-        const paramBlock = workspace.newBlock("scratch_function_param");
-        // paramBlock.setShadow(true); // alternative workaround to duplicated scratch_function_param blocks on deserialization
-        paramBlock.setMovable(false);
-        paramBlock.setFieldValue(name, "PARAM_NAME");
-        paramBlock.initSvg();
-        paramBlock.render();
+        // const workspace = this.workspace;
+        // const paramBlock = workspace.newBlock("scratch_function_param");
+        // // paramBlock.setShadow(true); // alternative workaround to duplicated scratch_function_param blocks on deserialization
+        // paramBlock.setMovable(false);
+        // paramBlock.setFieldValue(name, "PARAM_NAME");
+        // paramBlock.initSvg();
+        // paramBlock.render();
 
-        input.connection!.connect(paramBlock.outputConnection);
+        // input.connection!.connect(paramBlock.outputConnection);
       }
 
       if (stackInput) {
