@@ -161,6 +161,7 @@ export function functionFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
 
 
 export function initializeScratch() {
+
   Blockly.Blocks["event_whenflagclicked"] = {
     init: function () {
       this.appendDummyInput()
@@ -657,32 +658,60 @@ export function initializeScratch() {
   };
 
 
+  // Blockly.Blocks["variables_set"] = {
+  //   init: function () {
+  //     // console.log("============================");
+  //     // console.log(Blockly.Blocks);
+  //     // console.log("============================");
+  //     this.appendDummyInput()
+  //       .appendField("變數")
+  //       // .appendField(new Blockly.FieldVariable("變數名稱"), "VAR")
+  //       .appendField(
+  //         new Blockly.FieldVariable("變數名稱", undefined, [""]),
+
+  //         "VAR")
+  //       .appendField("設為");
+
+  //     // ✅ 建立 shadow block
+  //     let shadowBlock = document.createElement("shadow");
+  //     shadowBlock.setAttribute("type", "scratch_text"); // 🔹 設定為數字輸入框
+  //     let field = document.createElement("field");
+  //     field.setAttribute("name", "NUM");
+  //     field.textContent = "0"; // 🔹 預設值
+  //     shadowBlock.appendChild(field);
+  //     this.appendValueInput("VALUE")
+  //       // .setCheck(null)
+  //       // .setCheck(["Number", "String"])
+  //       // ✅ 設定 shadow block，讓輸入框變成 Scratch 樣式
+  //       .connection.setShadowDom(shadowBlock);
+
+  //     this.setInputsInline(true);
+  //     this.setPreviousStatement(true, null);
+  //     this.setNextStatement(true, null);
+  //     this.setColour("#FF9900");
+  //     this.setTooltip("設定變數的值");
+  //     this.setHelpUrl("");
+  //   },
+  // };
   Blockly.Blocks["variables_set"] = {
     init: function () {
-      // console.log("============================");
-      // console.log(Blockly.Blocks);
-      // console.log("============================");
       this.appendDummyInput()
         .appendField("變數")
-        // .appendField(new Blockly.FieldVariable("變數名稱"), "VAR")
-        .appendField(
-          new Blockly.FieldVariable("變數名稱", undefined, [""]),
-
-          "VAR")
+        .appendField(new Blockly.FieldVariable("變數名稱", undefined, [""]), "VAR")
         .appendField("設為");
-
+  
       // ✅ 建立 shadow block
       let shadowBlock = document.createElement("shadow");
-      shadowBlock.setAttribute("type", "math_number"); // 🔹 設定為數字輸入框
+      shadowBlock.setAttribute("type", "scratch_text"); // ✅ 自定義 Scratch 文字輸入框
       let field = document.createElement("field");
-      field.setAttribute("name", "NUM");
-      field.textContent = "0"; // 🔹 預設值
+      field.setAttribute("name", "TEXT"); // ✅ `scratch_text` 的正確 field 名稱應該是 TEXT
+      field.textContent = "0"; // ✅ 預設為 0
       shadowBlock.appendChild(field);
+  
       this.appendValueInput("VALUE")
-        .setCheck(null)
-        // ✅ 設定 shadow block，讓輸入框變成 Scratch 樣式
-        .connection.setShadowDom(shadowBlock);
-
+        .setCheck(["Number", "String"]) // ✅ 允許數字 & 文字
+        .connection.setShadowDom(shadowBlock); // ✅ 設定 shadow block
+  
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -691,12 +720,19 @@ export function initializeScratch() {
       this.setHelpUrl("");
     },
   };
+  
   javascriptGenerator.forBlock["variables_set"] = function (block) {
     var argument0 = javascriptGenerator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
     var varName = javascriptGenerator.nameDB_?.getName(
-      block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME);
-    return varName + ' = ' + argument0 + ';\n';
+      block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME
+    );
+  
+    // ✅ 嘗試將 argument0 轉為數字，如果是純數字則轉型
+    var code = `${varName} = (isNaN(${argument0}) ? ${argument0} : Number(${argument0}));\n`;
+  
+    return code;
   };
+  
 
   //不知道為甚麼要用math_change來實作variables_change但就先這樣好了不然好煩
   Blockly.Blocks["math_change"] = {

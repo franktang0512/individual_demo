@@ -32,7 +32,7 @@ import type {
   ScratchFunctionBlockJson,
 } from "@/lib/types";
 
-initiateBlocklyWorkspace();
+// initiateBlocklyWorkspace();
 
 export function CodeEditor() {
   const workspaceRef = useRef<BlocklyWorkspaceRef>(null);
@@ -87,6 +87,9 @@ export function CodeEditor() {
     },
     []
   );
+  useEffect(() => {
+    initiateBlocklyWorkspace(currentMode); // ✅ 根據模式載入對應的環境
+  }, [currentMode]); // 🔥 當 `currentMode` 變更時，重新初始化 Blockly 或 Scratch
   // ✅ 這個函數讓 `RecordTab.tsx` 可以直接載入 XML
   const loadXMLToWorkspace = useCallback((xmlString: string) => {
     if (!xmlString || !workspaceRef.current) return;

@@ -241,9 +241,10 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
                     </button>
                     <div className="text-left ">
                         <span className="font-bold text-xl">輸出：</span>
-                        <pre className="max-h-[400px] w-full overflow-y-auto text-lg font-mono leading-relaxed whitespace-pre-wrap break-words max-h-[500px]">
+                        <pre className="max-h-[400px] w-full overflow-x-auto overflow-y-auto text-lg font-mono leading-relaxed break-all whitespace-pre-wrap">
                             {output}
                         </pre>
+
                     </div>
                 </div>
 
@@ -373,6 +374,7 @@ function SubmitTab({ questionData, qid }: qProps) {
         // let modifiedCode = generatedCode.replace(
 
         // 存入當前程式碼，並維護歷史紀錄
+
         parsedData.questions[qid].push({
             time: timestamp,
             bs: currentMode,
@@ -381,6 +383,9 @@ function SubmitTab({ questionData, qid }: qProps) {
             numerator: 0,
             denominator: 0
         });
+        while (parsedData.questions[qid].length > 50) {
+            parsedData.questions[qid].shift();
+        }
 
         // 將更新後的紀錄存回 LocalStorage
         localStorage.setItem("stuansers", JSON.stringify(parsedData));
@@ -634,18 +639,18 @@ function RecordTab({ questionData, qid }: qProps) {
                                 onClick={() => {
                                     const xmlToLoad = record.code ?? `<xml xmlns="https://developers.google.com/blockly/xml"></xml>`;
                                     const targetMode = record.bs as "Blockly" | "Scratch";
-                                
+
                                     if (targetMode !== "Blockly" && targetMode !== "Scratch") {
                                         console.error("❌ 無效的模式:", record.bs);
                                         return;
                                     }
-                                
+
                                     const currentMode = useWorkspaceStore.getState().currentMode;
                                     const currentXML = useWorkspaceStore.getState().recordXMLCode;
-                                
+
                                     if (currentMode !== targetMode) {
                                         useWorkspaceStore.setState({ currentMode: targetMode });
-                                
+
                                         // 🔥 **稍微延遲，確保模式已經切換完成**
                                         setTimeout(() => {
                                             useWorkspaceStore.setState({ recordXMLCode: "" }); // 先清空 XML，確保會觸發 React 重新渲染
@@ -664,7 +669,7 @@ function RecordTab({ questionData, qid }: qProps) {
                                         }
                                     }
                                 }}
-                                
+
 
                             >
 

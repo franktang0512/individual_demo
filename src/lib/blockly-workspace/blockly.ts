@@ -3,6 +3,8 @@ import { javascriptGenerator, Order } from "blockly/javascript";
 import { colors } from "@/lib/colors";
 
 export function initializeBlockly() {
+  //   Blockly.Msg["VARIABLES_SET"] = "將 %1 設為 %2";
+  // Blockly.Msg["MATH_CHANGE_TITLE"] = "將 %1 的值加 %2";
   // ✅ 確保 `output_result_string` 變數被初始化
   const originalInit = javascriptGenerator.init;
   javascriptGenerator.init = function (workspace) {
@@ -514,20 +516,20 @@ export const blocklyToolboxConfig = {
             },
           },
         },
-        // {
-        //   kind: "block",
-        //   type: "text_prompt_ext",
-        //   inputs: {
-        //     TEXT: {
-        //       shadow: {
-        //         type: "text",
-        //         fields: {
-        //           TEXT: "請輸入文字",
-        //         },
-        //       },
-        //     },
-        //   },
-        // },
+        {
+          kind: "block",
+          type: "text_prompt_ext",
+          inputs: {
+            TEXT: {
+              shadow: {
+                type: "text",
+                fields: {
+                  TEXT: "請輸入文字",
+                },
+              },
+            },
+          },
+        },
       ],
     },
     {
