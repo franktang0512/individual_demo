@@ -603,29 +603,35 @@ export function initializeScratch() {
   };
 
   javascriptGenerator.forBlock["scratch_math_arithmetic"] = function (block) {
-    const a = javascriptGenerator.valueToCode(block, "A", Order.ATOMIC) || "0";
-    const b = javascriptGenerator.valueToCode(block, "B", Order.ATOMIC) || "0";
+    let a = javascriptGenerator.valueToCode(block, "A", Order.ATOMIC) || "0";
+    let b = javascriptGenerator.valueToCode(block, "B", Order.ATOMIC) || "0";
     const operator = block.getFieldValue("OP");
+
+    // **直接將 a, b 轉換為數字，若無法轉換則為 0**
+    const numberA = `(isNaN(Number(${a})) ? 0 : Number(${a}))`;
+    const numberB = `(isNaN(Number(${b})) ? 0 : Number(${b}))`;
 
     let code;
     switch (operator) {
-      case "ADD":
-        code = `${a} + ${b}`;
-        break;
-      case "MINUS":
-        code = `${a} - ${b}`;
-        break;
-      case "MULTIPLY":
-        code = `${a} * ${b}`;
-        break;
-      case "DIVIDE":
-        code = `${b} !== 0 ? ${a} / ${b} : "除數不能為零"`;
-        break;
-      default:
-        code = "0";
+        case "ADD":
+            code = `${numberA} + ${numberB}`;
+            break;
+        case "MINUS":
+            code = `${numberA} - ${numberB}`;
+            break;
+        case "MULTIPLY":
+            code = `${numberA} * ${numberB}`;
+            break;
+        case "DIVIDE":
+            code = `${numberB} !== 0 ? ${numberA} / ${numberB} : 0`;
+            break;
+        default:
+            code = "0";
     }
+
     return [code, Order.ADDITION];
-  };
+};
+
 
 
   Blockly.Blocks["scratch_length"] = {
@@ -945,35 +951,56 @@ export function initializeScratch() {
   };
 
 
-  javascriptGenerator.forBlock["scratch_list_add"] = function (block) {
-    // const list = javascriptGenerator.nameDB_!.getName(
-    //   block.getFieldValue("LIST"),
-    //   "VARIABLE"
-    // );
-    // const item =
-    //   javascriptGenerator.valueToCode(block, "ITEM", Order.NONE) || '""';
-    // return `${list}.push(${item});\n`;
+  // javascriptGenerator.forBlock["scratch_list_add"] = function (block) {
+  //   // const list = javascriptGenerator.nameDB_!.getName(
+  //   //   block.getFieldValue("LIST"),
+  //   //   "VARIABLE"
+  //   // );
+  //   // const item =
+  //   //   javascriptGenerator.valueToCode(block, "ITEM", Order.NONE) || '""';
+  //   // return `${list}.push(${item});\n`;
 
 
+  //   const field = block.getField("LIST");
+  //   if (!field) {
+  //     console.warn("Field 'LIST' not found on block:", block);
+  //     return "";
+  //   }
+
+  //   var listName = javascriptGenerator.nameDB_!.getName(
+  //     field.getText(),
+  //     Blockly.Names.NameType.VARIABLE
+  //   );
+
+  //   const item =
+  //     javascriptGenerator.valueToCode(block, "ITEM", Order.NONE) || '""';
+
+  //   return `${listName} = ${listName} || [];\n${listName}.push(${item});\n`;
+
+
+  // };
+
+javascriptGenerator.forBlock["scratch_list_add"] = function (block) {
     const field = block.getField("LIST");
     if (!field) {
-      console.warn("Field 'LIST' not found on block:", block);
-      return "";
+        console.warn("Field 'LIST' not found on block:", block);
+        return "";
     }
 
     var listName = javascriptGenerator.nameDB_!.getName(
-      field.getText(),
-      Blockly.Names.NameType.VARIABLE
+        field.getText(),
+        Blockly.Names.NameType.VARIABLE
     );
 
-    const item =
-      javascriptGenerator.valueToCode(block, "ITEM", Order.NONE) || '""';
+    let itemCode =
+        javascriptGenerator.valueToCode(block, "ITEM", Order.NONE) || '""';
 
-    return `${listName} = ${listName} || [];\n${listName}.push(${item});\n`;
+    // 嘗試將 `itemCode` 轉換為數字
+    const numberCheck = `!isNaN(parseFloat(${itemCode})) && isFinite(${itemCode})`;
 
-
-  };
-
+    return `${listName} = ${listName} || [];\n` +
+           `${listName}.push(${numberCheck} ? Number(${itemCode}) : ${itemCode});\n`;
+};
 
 
   Blockly.Blocks["scratch_list_empty"] = {
