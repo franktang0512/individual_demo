@@ -158,17 +158,42 @@ function IntroTab({ questionData }: { questionData: any }) {
     );
 }
 
-function CodeDrillTab({ questionData }: { questionData: any }) {
+function CodeDrillTab({ questionData ,qid}: qProps) {
     const [activeExample, setActiveExample] = useState<string | null>(null);
     const [output, setOutput] = useState<string>("");
 
     const currentMode = useWorkspaceStore((state) => state.currentMode); // 取得 Blockly 或 Scratch 模式
     const generatedCode = useWorkspaceStore((state) => state.generatedCode); // 取得 Blockly 產生的程式碼
-
+    const generatedXMLCode = useWorkspaceStore((state) => state.generatedXMLCode); // 取得 Blockly 產生的程式碼
+    
+    const storedData = localStorage.getItem("stulastsubmit");
+    var parsedLastData = storedData ? JSON.parse(storedData) : { questions: {1:[],2:[]} };
     if (!questionData) return <p>載入中...</p>;
 
     const drillClick = async () => {
         try {
+            // parsedLastData.questions[qid]..questions[qid]
+            // console.log(parsedLastData);
+            parsedLastData.questions[qid].push({
+                bs: currentMode,
+                code: generatedXMLCode,
+            });
+            while (parsedLastData.questions[qid].length > 1) {
+                parsedLastData.questions[qid].shift();
+            }
+            localStorage.setItem("stulastsubmit", JSON.stringify(parsedLastData));
+
+            if (currentMode === "Scratch") {
+                const workspace = Blockly.getMainWorkspace();
+                const greenFlagBlocks = workspace.getBlocksByType('event_whenflagclicked', false);
+                if (!(greenFlagBlocks.length === 1)) {
+                    // alert("Scratch 模式下，請恰好使用一個『點擊綠旗』積木！");
+                    const result = "";
+                    setOutput(result);
+                    return;
+                }
+            }
+
             setOutput(""); // 清空輸出
             let sandbox = new Function(`${generatedCode}; return output_result_string;`);
             const result = sandbox();
@@ -178,6 +203,38 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
             setOutput("執行錯誤！");
         }
     };
+    const returnCodeClick = () => {
+        const storedData = localStorage.getItem("stulastsubmit");
+        const parsedData = storedData ? JSON.parse(storedData) : { questions: {} };
+    
+        // 確保該題目有提交過程式碼
+        if (!parsedData.questions[qid] || parsedData.questions[qid].length === 0) {
+            return; // **如果沒有提交過，直接返回，不做任何操作**
+        }
+    
+        // 取得該題的最新提交記錄
+        const lastSubmission = parsedData.questions[qid][parsedData.questions[qid].length - 1];
+        const lastMode = lastSubmission.bs; // Blockly 或 Scratch
+        const lastXML = lastSubmission.code ?? `<xml xmlns="https://developers.google.com/blockly/xml"></xml>`;
+    
+        // 切換到對應的模式（Blockly / Scratch）
+        if (lastMode === "Scratch") {
+            useWorkspaceStore.setState({ currentMode: "Scratch" });
+        } else {
+            useWorkspaceStore.setState({ currentMode: "Blockly" });
+        }
+    
+        // **確保模式切換後載入程式碼**
+        setTimeout(() => {
+            useWorkspaceStore.setState({ recordXMLCode: "" }); // 先清空 XML
+            setTimeout(() => {
+                useWorkspaceStore.setState({ recordXMLCode: lastXML });
+                // console.log("✅ 已還原程式碼:", lastXML);
+            }, 50);
+        }, 50);
+    };
+    
+
     //worker沒有瀏覽器 所以有windows prompt的話都會報錯，因此使用者如果程式crash的話自己要承擔
     // const drillClick = () => {
     //     console.log(generatedCode);
@@ -226,7 +283,7 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
         <TabComponentWrapper title={questionData.title}>
             <div className="w-full max-w-lg max-h-full overflow-y-auto rounded-lg p-2">
                 {/* 互動區域 */}
-                <div className="flex flex-col items-start space-y-2 w-full">
+                <div className="flex flex-row items-center space-x-4 w-full">
                     <button
                         className="shadow-md px-10 py-3 bg-white border-2 border-green-500 rounded-full flex items-center justify-center w-36 h-12"
                         onClick={drillClick}
@@ -239,14 +296,22 @@ function CodeDrillTab({ questionData }: { questionData: any }) {
                             </span>
                         )}
                     </button>
-                    <div className="text-left ">
-                        <span className="font-bold text-xl">輸出：</span>
-                        <pre className="max-h-[400px] w-full overflow-x-auto overflow-y-auto text-lg font-mono leading-relaxed break-all whitespace-pre-wrap">
-                            {output}
-                        </pre>
-
-                    </div>
+                    <button
+                        className="shadow-md px-10 py-3 bg-white border-2 border-green-500 rounded-full flex items-center justify-center w-36 h-12"
+                        onClick={returnCodeClick}
+                    >
+                        <span className="text-lg font-bold text-green-500 tracking-widest whitespace-nowrap">
+                            還原程式
+                        </span>
+                    </button>
                 </div>
+                <div className="text-left mt-4 w-full">
+                    <span className="font-bold text-xl">輸出：</span>
+                    <pre className="max-h-[400px] w-full overflow-x-auto overflow-y-auto text-lg font-mono leading-relaxed break-all whitespace-pre-wrap">
+                        {output}
+                    </pre>
+                </div>
+
 
 
                 {/* 顯示範例測試資料 */}
@@ -1122,7 +1187,7 @@ function Question({ id }: { id: number }) {
                 value: 'tab2',
                 // title: '任務演練',                                
                 title: '自行測試',
-                content: <CodeDrillTab questionData={questionData} />,
+                content: <CodeDrillTab questionData={questionData} qid={id}/>,
             },
             {
                 value: 'tab3',
