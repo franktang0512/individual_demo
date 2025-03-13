@@ -27,7 +27,7 @@ export function variableFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
 
   if (variables.length > 0) {
     const blockTypes = [
-      "scratch_variables_set",      
+      "scratch_variables_set",
       "scratch_variables_change",
       "scratch_variables_get",
     ];
@@ -77,6 +77,8 @@ export function listFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
       "scratch_list_insert",
       "scratch_list_set",
       "scratch_list_remove",
+      "scratch_list_contain",
+      "scratch_list_indexof",
     ];
 
     for (const list of lists) {
@@ -613,24 +615,24 @@ export function initializeScratch() {
 
     let code;
     switch (operator) {
-        case "ADD":
-            code = `${numberA} + ${numberB}`;
-            break;
-        case "MINUS":
-            code = `${numberA} - ${numberB}`;
-            break;
-        case "MULTIPLY":
-            code = `${numberA} * ${numberB}`;
-            break;
-        case "DIVIDE":
-            code = `${numberB} !== 0 ? ${numberA} / ${numberB} : 0`;
-            break;
-        default:
-            code = "0";
+      case "ADD":
+        code = `${numberA} + ${numberB}`;
+        break;
+      case "MINUS":
+        code = `${numberA} - ${numberB}`;
+        break;
+      case "MULTIPLY":
+        code = `${numberA} * ${numberB}`;
+        break;
+      case "DIVIDE":
+        code = `${numberB} !== 0 ? ${numberA} / ${numberB} : 0`;
+        break;
+      default:
+        code = "0";
     }
 
     return [code, Order.ADDITION];
-};
+  };
 
 
 
@@ -792,7 +794,7 @@ export function initializeScratch() {
           "VAR")
       this.setInputsInline(true);
       this.setOutput(true, null);
-      this.setColour("#FF9900"); 
+      this.setColour("#FF9900");
       // this.setColour("%{BKY_VARIABLES_HUE}");
       this.setTooltip("");
       this.setHelpUrl("");
@@ -804,8 +806,8 @@ export function initializeScratch() {
       block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME) || 'undefined_var';
     return [varName, Order.ATOMIC]; // 確保回傳值符合 [string, number] 的型別要求
   };
-  
-  
+
+
 
 
   // Get list (reporter)
@@ -980,27 +982,27 @@ export function initializeScratch() {
 
   // };
 
-javascriptGenerator.forBlock["scratch_list_add"] = function (block) {
+  javascriptGenerator.forBlock["scratch_list_add"] = function (block) {
     const field = block.getField("LIST");
     if (!field) {
-        console.warn("Field 'LIST' not found on block:", block);
-        return "";
+      console.warn("Field 'LIST' not found on block:", block);
+      return "";
     }
 
     var listName = javascriptGenerator.nameDB_!.getName(
-        field.getText(),
-        Blockly.Names.NameType.VARIABLE
+      field.getText(),
+      Blockly.Names.NameType.VARIABLE
     );
 
     let itemCode =
-        javascriptGenerator.valueToCode(block, "ITEM", Order.NONE) || '""';
+      javascriptGenerator.valueToCode(block, "ITEM", Order.NONE) || '""';
 
     // 嘗試將 `itemCode` 轉換為數字
     const numberCheck = `!isNaN(parseFloat(${itemCode})) && isFinite(${itemCode})`;
 
     return `${listName} = ${listName} || [];\n` +
-           `${listName}.push(${numberCheck} ? Number(${itemCode}) : ${itemCode});\n`;
-};
+      `${listName}.push(${numberCheck} ? Number(${itemCode}) : ${itemCode});\n`;
+  };
 
 
   Blockly.Blocks["scratch_list_empty"] = {
@@ -1284,6 +1286,117 @@ javascriptGenerator.forBlock["scratch_list_add"] = function (block) {
     return `${listName} = ${listName} || [];\n${listName}.splice(${index} - 1, 1);\n`;
 
   };
+
+
+  Blockly.Blocks["scratch_list_contain"] = {
+    init: function () {
+        this.appendDummyInput()
+            .appendField("清單") // ✅ 顯示標題
+            .appendField(
+                new Blockly.FieldVariable("myList", undefined, ["list"], "list"), // ✅ 只能選擇「清單」變數
+                "LIST"
+            )
+            .appendField("包含");
+
+        let itemInput = this.appendValueInput("ITEM").setCheck(null); // ✅ 可輸入任何類型的數據
+
+        // ✅ 設定 `ITEM` 的白色橢圓 Shadow Block（文字輸入框）
+        let itemShadow = document.createElement("shadow");
+        itemShadow.setAttribute("type", "scratch_text");
+        let itemField = document.createElement("field");
+        itemField.setAttribute("name", "TEXT");
+        itemField.textContent = "thing"; // 預設值
+        itemShadow.appendChild(itemField);
+        itemInput.connection.setShadowDom(itemShadow); // ✅ 讓 `ITEM` 變成 Scratch 樣式
+
+        this.appendDummyInput().appendField("?"); // ✅ 加上問號
+
+        this.setInputsInline(true); // ✅ 保持 Scratch 樣式
+        this.setOutput(true, "Boolean"); // ✅ 返回布林值
+        this.setStyle("list_blocks"); // ✅ 設定 Scratch 列表風格
+        this.setTooltip("檢查清單是否包含指定的元素");
+    },
+};
+
+
+javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
+  const field = block.getField("LIST");
+  if (!field) {
+      console.warn("Field 'LIST' not found on block:", block);
+      return ["false", Order.ATOMIC]; // 預設返回 false
+  }
+
+  var listName = javascriptGenerator.nameDB_?.getName(
+      field.getText(),
+      Blockly.Names.NameType.VARIABLE
+  ) || "undefined_list";
+
+  let item = javascriptGenerator.valueToCode(block, "ITEM", Order.ATOMIC) || '""';
+
+  return [
+      `(${listName} = ${listName} || [], 
+      ${listName}.some(x => isNaN(x) ? String(x).trim() === String(${item}).trim() : Number(x) === Number(${item})))`,
+      Order.ATOMIC
+  ];
+};
+
+
+  Blockly.Blocks["scratch_list_indexof"] = {
+    init: function () {
+
+
+      let itemInput = this.appendValueInput("ITEM").setCheck(null).appendField("");
+
+      // ✅ 設定 `ITEM` 的白色橢圓 Shadow Block（文字輸入框）
+      let itemShadow = document.createElement("shadow");
+      itemShadow.setAttribute("type", "scratch_text");
+      let itemField = document.createElement("field");
+      itemField.setAttribute("name", "TEXT");
+      itemField.textContent = "thing"; // 預設值
+      itemShadow.appendChild(itemField);
+      itemInput.connection.setShadowDom(itemShadow); // ✅ 讓 `ITEM` 變成 Scratch 樣式
+
+
+      // this.appendValueInput("ITEM") // 🔹 可輸入要查找的值
+      // .setCheck(null); // ✅ 允許所有類型（數字、文字），這樣就會是 Scratch 樣式的橢圓形白色框
+
+      this.appendDummyInput()
+        .appendField("在") // "在 [列表] 裡的項目編號"
+        .appendField(
+          new Blockly.FieldVariable("myList", undefined, ["list"], "list"), // 限制變數類型為「列表」
+          "LIST"
+        )
+        .appendField("裡的項目編號");
+  
+      this.setInputsInline(true); // ✅ 保持 Scratch 樣式
+      this.setOutput(true, "Number"); // ✅ 返回數字類型
+      this.setStyle("list_blocks"); // ✅ 設定 Scratch 列表風格
+      this.setTooltip("取得指定值在列表中的位置");
+    },
+  };
+
+
+  javascriptGenerator.forBlock["scratch_list_indexof"] = function (block) {
+    const listName = javascriptGenerator.nameDB_?.getName(
+        block.getFieldValue("LIST"),
+        Blockly.Names.NameType.VARIABLE
+    ) || "undefined_list";
+
+    let item = javascriptGenerator.valueToCode(block, "ITEM", Order.ATOMIC) || '""';
+
+    return [
+        `(${listName} = ${listName} || [], 
+        ${listName}.map(x => isNaN(x) ? String(x).trim() : Number(x))
+        .indexOf(isNaN(${item}) ? String(${item}).trim() : Number(${item})) + 1 || 0)`,
+        Order.ATOMIC
+    ];
+};
+
+
+  
+  
+
+
 
   // @ts-expect-error properties to be added to Blockly.Block to make it a ScratchFunctionBlock
   const functionMixin: ScratchFunctionBlock = {
