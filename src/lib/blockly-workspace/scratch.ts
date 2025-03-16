@@ -13,33 +13,67 @@ function createVariableField(variable: Blockly.VariableModel) {
   field.textContent = variable.name;
   return field;
 }
+// export function variableFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
+//   const xmlList = [];
+
+//   // Button to create a new variable
+//   const button = document.createElement("button");
+//   button.setAttribute("text", "建立變數");
+//   button.setAttribute("callbackKey", "CREATE_SCRATCH_VARIABLE"); // ✅ 確保使用 Blockly 內建變數創建
+//   xmlList.push(button);
+
+//   // 取得目前的變數列表
+//   const variables = workspace.getVariablesOfType(""); // ✅ "" 代表一般變數，而非 "list"
+
+//   if (variables.length > 0) {
+//     const blockTypes = [
+//       "scratch_variables_set",
+//       "scratch_variables_change",
+//       "scratch_variables_get",
+//     ];
+
+//     for (const variable of variables) {
+//       for (const type of blockTypes) {
+//         const block = document.createElement("block");
+//         block.setAttribute("type", type);
+//         block.appendChild(createVariableField(variable));
+//         xmlList.push(block);
+//       }
+//     }
+//   }
+
+//   return xmlList;
+// }
 export function variableFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
   const xmlList = [];
 
-  // Button to create a new variable
+  // 建立變數按鈕
   const button = document.createElement("button");
   button.setAttribute("text", "建立變數");
-  button.setAttribute("callbackKey", "CREATE_SCRATCH_VARIABLE"); // ✅ 確保使用 Blockly 內建變數創建
+  button.setAttribute("callbackKey", "CREATE_SCRATCH_VARIABLE");
   xmlList.push(button);
 
   // 取得目前的變數列表
-  const variables = workspace.getVariablesOfType(""); // ✅ "" 代表一般變數，而非 "list"
+  const variables = workspace.getVariablesOfType("");
 
   if (variables.length > 0) {
-    const blockTypes = [
-      "scratch_variables_set",
-      "scratch_variables_change",
-      "scratch_variables_get",
-    ];
+    const lastVariable = variables[variables.length - 1]; // 取得最後宣告的變數
 
     for (const variable of variables) {
-      for (const type of blockTypes) {
-        const block = document.createElement("block");
-        block.setAttribute("type", type);
-        block.appendChild(createVariableField(variable));
-        xmlList.push(block);
-      }
+      // 只為「取得變數值」生成積木（所有變數）
+      const getBlock = document.createElement("block");
+      getBlock.setAttribute("type", "scratch_variables_get");
+      getBlock.appendChild(createVariableField(variable));
+      xmlList.push(getBlock);
     }
+
+    // 只為「最後一個變數」生成「設為」與「改變」積木
+    ["scratch_variables_set", "scratch_variables_change"].forEach((type) => {
+      const block = document.createElement("block");
+      block.setAttribute("type", type);
+      block.appendChild(createVariableField(lastVariable));
+      xmlList.push(block);
+    });
   }
 
   return xmlList;
@@ -56,20 +90,68 @@ function createListField(listVar: Blockly.VariableModel) {
   field.appendChild(name);
   return field;
 }
+// export function listFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
+//   const xmlList = [];
+
+//   // Button to create a new list
+//   const button = document.createElement("button");
+//   button.setAttribute("text", "建立新清單");
+//   button.setAttribute("callbackKey", "CREATE_SCRATCH_LIST");
+//   xmlList.push(button);
+
+//   const lists = workspace.getVariablesOfType("list");
+
+//   if (lists.length > 0) {
+//     const blockTypes = [
+//       "scratch_list_get",
+//       "scratch_list_add",
+//       "scratch_list_get_item",
+//       "scratch_list_empty",
+//       "scratch_list_length",
+//       "scratch_list_insert",
+//       "scratch_list_set",
+//       "scratch_list_remove",
+//       "scratch_list_contain",
+//       "scratch_list_indexof",
+//     ];
+
+//     for (const list of lists) {
+//       for (const type of blockTypes) {
+//         const block = document.createElement("block");
+//         block.setAttribute("type", type);
+//         block.appendChild(createListField(list));
+//         xmlList.push(block);
+//       }
+//     }
+//   }
+
+//   return xmlList;
+// }
 export function listFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
   const xmlList = [];
 
-  // Button to create a new list
+  // 建立新清單按鈕
   const button = document.createElement("button");
   button.setAttribute("text", "建立新清單");
   button.setAttribute("callbackKey", "CREATE_SCRATCH_LIST");
   xmlList.push(button);
 
+  // 取得目前的清單變數
   const lists = workspace.getVariablesOfType("list");
 
   if (lists.length > 0) {
-    const blockTypes = [
-      "scratch_list_get",
+    const lastList = lists[lists.length - 1]; // 取得最後宣告的清單
+
+    for (const list of lists) {
+      // **為所有清單產生「取得清單值」積木**
+      const getBlock = document.createElement("block");
+      getBlock.setAttribute("type", "scratch_list_get");
+      getBlock.appendChild(createListField(list));
+      xmlList.push(getBlock);
+    }
+
+    // **只為「最後宣告的清單」生成其他積木**
+    [
       "scratch_list_add",
       "scratch_list_get_item",
       "scratch_list_empty",
@@ -79,20 +161,17 @@ export function listFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
       "scratch_list_remove",
       "scratch_list_contain",
       "scratch_list_indexof",
-    ];
-
-    for (const list of lists) {
-      for (const type of blockTypes) {
-        const block = document.createElement("block");
-        block.setAttribute("type", type);
-        block.appendChild(createListField(list));
-        xmlList.push(block);
-      }
-    }
+    ].forEach((type) => {
+      const block = document.createElement("block");
+      block.setAttribute("type", type);
+      block.appendChild(createListField(lastList));
+      xmlList.push(block);
+    });
   }
 
   return xmlList;
 }
+
 
 export function functionFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
   const xmlList = [];
