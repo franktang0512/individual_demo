@@ -195,6 +195,7 @@ function CodeDrillTab({ questionData ,qid}: qProps) {
             }
 
             setOutput(""); // 清空輸出
+            console.log(generatedCode);
             let sandbox = new Function(`${generatedCode}; return output_result_string;`);
             const result = sandbox();
             setOutput(result);

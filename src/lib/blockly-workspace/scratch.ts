@@ -1892,8 +1892,8 @@ export const scratchToolboxConfig = {
             // TEXT: {}, // 確保輸入框為空，無預設值
           },
         },
-        { kind: "block", type: "event_noinput" },
-        { kind: "block", type: "event_hasinput" },
+        // { kind: "block", type: "event_noinput" },
+        // { kind: "block", type: "event_hasinput" },
 
       ],
     },
