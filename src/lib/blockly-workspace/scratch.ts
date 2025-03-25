@@ -7,43 +7,22 @@ import { ScratchFunctionBlock, ScratchFunctionParameter } from "../types";
 // ✅ 創建變數欄位
 function createVariableField(variable: Blockly.VariableModel) {
   const field = document.createElement("field");
+  // console.log(field+"hahaha");
+  const pattern = /^[\u4e00-\u9fa5a-zA-Z0-9]+$/; // 不允許底線
+  if (!pattern.test(variable.name)) {
+    alert("變數名稱只能包含中英文字符和數字，並且不允許底線！");
+    // return document.createElement("div"); // 返回一個空的 div 作為佔位符
+    console.log(field);
+    return field;
+  }
   field.setAttribute("name", "VAR");
   field.setAttribute("id", variable.getId());
   field.setAttribute("variabletype", "");
+
   field.textContent = variable.name;
   return field;
 }
-// export function variableFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
-//   const xmlList = [];
 
-//   // Button to create a new variable
-//   const button = document.createElement("button");
-//   button.setAttribute("text", "建立變數");
-//   button.setAttribute("callbackKey", "CREATE_SCRATCH_VARIABLE"); // ✅ 確保使用 Blockly 內建變數創建
-//   xmlList.push(button);
-
-//   // 取得目前的變數列表
-//   const variables = workspace.getVariablesOfType(""); // ✅ "" 代表一般變數，而非 "list"
-
-//   if (variables.length > 0) {
-//     const blockTypes = [
-//       "scratch_variables_set",
-//       "scratch_variables_change",
-//       "scratch_variables_get",
-//     ];
-
-//     for (const variable of variables) {
-//       for (const type of blockTypes) {
-//         const block = document.createElement("block");
-//         block.setAttribute("type", type);
-//         block.appendChild(createVariableField(variable));
-//         xmlList.push(block);
-//       }
-//     }
-//   }
-
-//   return xmlList;
-// }
 export function variableFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
   const xmlList = [];
 
@@ -57,23 +36,39 @@ export function variableFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
   const variables = workspace.getVariablesOfType("");
 
   if (variables.length > 0) {
-    const lastVariable = variables[variables.length - 1]; // 取得最後宣告的變數
+    const pattern = /^[\u4e00-\u9fa5a-zA-Z0-9]+$/; // 不允許底線
 
-    for (const variable of variables) {
-      // 只為「取得變數值」生成積木（所有變數）
+    for (let i = 0; i < variables.length; i++) {
+      const variable = variables[i];
+
+      // 檢查每個變數名稱是否符合規範
+      if (!pattern.test(variable.name)) {
+        workspace.deleteVariableById(variable.getId()); // 刪除不符合命名規範的變數
+        // alert(`變數名稱 "${variable.name}" 不符合規範，已被刪除！`);
+        alert(`請只使用中英文宣告變數名稱！`);
+        continue; // 直接跳過這個變數，繼續處理下個變數
+      }
+
+      // 為符合規範的變數生成積木
       const getBlock = document.createElement("block");
       getBlock.setAttribute("type", "scratch_variables_get");
-      getBlock.appendChild(createVariableField(variable));
-      xmlList.push(getBlock);
-    }
 
-    // 只為「最後一個變數」生成「設為」與「改變」積木
-    ["scratch_variables_set", "scratch_variables_change"].forEach((type) => {
-      const block = document.createElement("block");
-      block.setAttribute("type", type);
-      block.appendChild(createVariableField(lastVariable));
-      xmlList.push(block);
-    });
+      const field = createVariableField(variable);
+      if (field.textContent) {
+        getBlock.appendChild(field);
+        xmlList.push(getBlock);
+      }
+
+      // 只為「最後一個變數」生成「設為」與「改變」積木
+      if (i === variables.length - 1) {
+        ["scratch_variables_set", "scratch_variables_change"].forEach((type) => {
+          const block = document.createElement("block");
+          block.setAttribute("type", type);
+          block.appendChild(createVariableField(variable));
+          xmlList.push(block);
+        });
+      }
+    }
   }
 
   return xmlList;
@@ -90,43 +85,7 @@ function createListField(listVar: Blockly.VariableModel) {
   field.appendChild(name);
   return field;
 }
-// export function listFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
-//   const xmlList = [];
 
-//   // Button to create a new list
-//   const button = document.createElement("button");
-//   button.setAttribute("text", "建立新清單");
-//   button.setAttribute("callbackKey", "CREATE_SCRATCH_LIST");
-//   xmlList.push(button);
-
-//   const lists = workspace.getVariablesOfType("list");
-
-//   if (lists.length > 0) {
-//     const blockTypes = [
-//       "scratch_list_get",
-//       "scratch_list_add",
-//       "scratch_list_get_item",
-//       "scratch_list_empty",
-//       "scratch_list_length",
-//       "scratch_list_insert",
-//       "scratch_list_set",
-//       "scratch_list_remove",
-//       "scratch_list_contain",
-//       "scratch_list_indexof",
-//     ];
-
-//     for (const list of lists) {
-//       for (const type of blockTypes) {
-//         const block = document.createElement("block");
-//         block.setAttribute("type", type);
-//         block.appendChild(createListField(list));
-//         xmlList.push(block);
-//       }
-//     }
-//   }
-
-//   return xmlList;
-// }
 export function listFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
   const xmlList = [];
 
@@ -138,39 +97,48 @@ export function listFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
 
   // 取得目前的清單變數
   const lists = workspace.getVariablesOfType("list");
-
+  const lastList = lists[lists.length - 1]; // 取得最後宣告的清單
   if (lists.length > 0) {
-    const lastList = lists[lists.length - 1]; // 取得最後宣告的清單
+    const pattern = /^[\u4e00-\u9fa5a-zA-Z0-9]+$/; // 不允許底線
+    if (!pattern.test(lastList.name)) {
 
-    for (const list of lists) {
-      // **為所有清單產生「取得清單值」積木**
-      const getBlock = document.createElement("block");
-      getBlock.setAttribute("type", "scratch_list_get");
-      getBlock.appendChild(createListField(list));
-      xmlList.push(getBlock);
+      workspace.deleteVariableById(lastList.getId()); // 刪除不符合命名規範的清單變數      
+      lists.splice(lists.length - 1, 1);
+      // alert(`清單名稱 "${list.name}" 不符合規範，已被刪除！`);
+      alert(`請只使用中英文宣告清單名稱！`);
+      // 直接跳過這個變數，繼續處理下個變數
+    } else {
+      for (const list of lists) {
+        //檢查每個清單名稱是否符合規範
+        // **為所有清單產生「取得清單值」積木**
+        const getBlock = document.createElement("block");
+        getBlock.setAttribute("type", "scratch_list_get");
+        getBlock.appendChild(createListField(list));
+        xmlList.push(getBlock);
+      }
+
+      // **只為「最後宣告的清單」生成其他積木**
+      [
+        "scratch_list_add",
+        "scratch_list_get_item",
+        "scratch_list_empty",
+        "scratch_list_length",
+        "scratch_list_insert",
+        "scratch_list_set",
+        "scratch_list_remove",
+        "scratch_list_contain",
+        "scratch_list_indexof",
+      ].forEach((type) => {
+        const block = document.createElement("block");
+        block.setAttribute("type", type);
+        block.appendChild(createListField(lastList));
+        xmlList.push(block);
+      });
     }
-
-    // **只為「最後宣告的清單」生成其他積木**
-    [
-      "scratch_list_add",
-      "scratch_list_get_item",
-      "scratch_list_empty",
-      "scratch_list_length",
-      "scratch_list_insert",
-      "scratch_list_set",
-      "scratch_list_remove",
-      "scratch_list_contain",
-      "scratch_list_indexof",
-    ].forEach((type) => {
-      const block = document.createElement("block");
-      block.setAttribute("type", type);
-      block.appendChild(createListField(lastList));
-      xmlList.push(block);
-    });
   }
-
   return xmlList;
 }
+
 
 
 export function functionFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
@@ -184,7 +152,7 @@ export function functionFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
 
   const functionBlocks = workspace.getBlocksByType(
     "scratch_function_definition",
-    false
+    false,
   ) as ScratchFunctionBlock[];
 
   for (const block of functionBlocks) {
@@ -215,7 +183,7 @@ export function functionFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
         mutation.setAttribute("name", param.name);
         mutation.setAttribute(
           "paramtype",
-          param.type === "Boolean" ? "Boolean" : "NumberString"
+          param.type === "Boolean" ? "Boolean" : "NumberString",
         );
         paramBlock.appendChild(mutation);
 
@@ -282,27 +250,6 @@ export function initializeScratch() {
     const textValue = block.getFieldValue("TEXT") || "";
     return [`"${textValue}"`, Order.ATOMIC];
   };
-  // Blockly.Blocks["variable_change"] = {
-  //   init: function () {
-  //     var a = new Blockly.FieldVariable("VAR_NAME", null, ['Var'], "Var");
-  //     a.onItemSelected_ = MENU;
-  //     this.appendDummyInput()
-  //       .appendField("變數")
-  //       .appendField(a, "VAR");
-  //     this.appendValueInput("DELTA")
-  //       .setCheck("Number")
-  //       .appendField("改變");
-  //     this.setInputsInline(true);
-  //     this.setPreviousStatement(true, null);
-  //     this.setNextStatement(true, null);
-  //     this.setColour("#FF9900");
-  //     this.setTooltip("");
-  //     this.setHelpUrl("");
-  //   },
-  //   // style: { hidden: true } // 🔹 讓這個積木不顯示在 Toolbox
-  // };
-
-
 
   Blockly.Blocks["event_askandwait"] = {
     init: function () {
@@ -370,16 +317,6 @@ export function initializeScratch() {
     },
   };
   javascriptGenerator.forBlock["event_say"] = function (block) {
-    // var msg = javascriptGenerator.valueToCode(block, 'TEXT', Order.NONE) || "''";
-    // var code = 'output_result_string = "";\n'; // 先清空
-    // code = 'if (typeof output_result_string === "undefined") output_result_string = "";\n';
-    // code += 'output_result_string = ' + msg + ' + "\\n";\n';
-
-    // return code;
-    // var msg = javascriptGenerator.valueToCode(block, 'TEXT', Order.NONE) || '\'\'';
-    // var code = 'output_result_string += ' + msg + '\n' + 'output_result_string += \'\\n\' \n'
-    // return code;
-
     var msg = javascriptGenerator.valueToCode(block, 'TEXT', Order.NONE) || '\'\'';
     var code = 'output_result_string += ' + String(msg) + ';\n' + 'output_result_string += \'\\n\' ;\n'
     return code;
@@ -443,15 +380,6 @@ export function initializeScratch() {
 
   Blockly.Blocks["scratch_string_join"] = {
     init: function () {
-      // this.appendValueInput("TEXT0").setCheck(null).appendField("字串組合");
-      // this.appendValueInput("TEXT1").setCheck(null);
-      // this.setInputsInline(true);
-      // this.setOutput(true, "String");
-      // this.setStyle("calculation_blocks");
-      // this.setTooltip("組合兩個字串");
-      // this.setHelpUrl("");
-
-
 
       this.appendValueInput("TEXT0")
         .setCheck(null)
@@ -467,12 +395,6 @@ export function initializeScratch() {
   };
 
   javascriptGenerator.forBlock["scratch_string_join"] = function (block) {
-    // const text0 =
-    //   javascriptGenerator.valueToCode(block, "TEXT0", Order.ATOMIC) || "''";
-    // const text1 =
-    //   javascriptGenerator.valueToCode(block, "TEXT1", Order.ATOMIC) || "''";
-    // return [`${text0} + ${text1}`, Order.ADDITION];
-
 
     var element0 = javascriptGenerator.valueToCode(block, "TEXT0", Order.ATOMIC) || '""';
     var element1 = javascriptGenerator.valueToCode(block, "TEXT1", Order.ATOMIC) || '""';
@@ -594,7 +516,7 @@ export function initializeScratch() {
     const times =
       javascriptGenerator.valueToCode(block, "TIMES", Order.ATOMIC) || "0";
     const statements = javascriptGenerator.statementToCode(block, "DO");
-    return `for (let count = 0; count < ${times}; count++) {\n${statements}}\n`;
+    return `for (let __internalCount = 0; __internalCount < ${times}; __internalCount++) {\n${statements}}\n`;
   };
 
   Blockly.Blocks["scratch_while"] = {
@@ -667,6 +589,46 @@ export function initializeScratch() {
     }
   };
 
+
+
+  // javascriptGenerator.forBlock["controls_flow_statements"] = function (block) {
+  //   const mode = block.getFieldValue("FLOW"); // 取得 BLOCK 設定的模式 (BREAK 或 CONTINUE)
+
+  //   if (mode === "BREAK") {
+  //     return "break;\n";
+  //   } else if (mode === "CONTINUE") {
+  //     return "continue;\n";
+  //   }
+
+  //   return "";
+  // };
+
+  Blockly.Blocks["scratch_controls_flow_statements"] = {
+    init: function () {
+      this.appendDummyInput().appendField(
+        new Blockly.FieldDropdown([
+          ["中斷循環", "BREAK"],
+          ["繼續下一個循環", "CONTINUE"],
+        ]),
+        "FLOW",
+      );
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(false, null);
+      this.setStyle("control_blocks");
+      this.setTooltip("控制重複的執行流程");
+    },
+  };
+
+  javascriptGenerator.forBlock["scratch_controls_flow_statements"] = function (
+    block,
+  ) {
+    const flow = block.getFieldValue("FLOW");
+    return flow === "BREAK" ? "break;\n" : "continue;\n";
+  };
+
+
+
+
   Blockly.Blocks["scratch_math_arithmetic"] = {
     init: function () {
       this.appendValueInput("A")
@@ -682,6 +644,8 @@ export function initializeScratch() {
       this.setHelpUrl("");
     },
   };
+
+
 
   javascriptGenerator.forBlock["scratch_math_arithmetic"] = function (block) {
     let a = javascriptGenerator.valueToCode(block, "A", Order.ATOMIC) || "0";
@@ -780,88 +744,167 @@ export function initializeScratch() {
   //     this.setHelpUrl("");
   //   },
   // };
+
+
+
+  // Blockly.Blocks["scratch_variables_set"] = {
+  //   init: function () {
+  //     this.appendDummyInput()
+  //       .appendField("變數")
+  //       .appendField(new Blockly.FieldVariable("變數名稱", undefined, [""]), "VAR")
+  //       .appendField("設為");
+
+  //     // ✅ 建立 shadow block
+  //     let shadowBlock = document.createElement("shadow");
+  //     shadowBlock.setAttribute("type", "scratch_text"); // ✅ 自定義 Scratch 文字輸入框
+  //     let field = document.createElement("field");
+  //     field.setAttribute("name", "TEXT"); // ✅ `scratch_text` 的正確 field 名稱應該是 TEXT
+  //     field.textContent = "0"; // ✅ 預設為 0
+  //     shadowBlock.appendChild(field);
+
+  //     this.appendValueInput("VALUE")
+  //       // .setCheck(["Number", "String"]) // ✅ 允許數字 & 文字
+  //       .setCheck(null)
+  //       .connection.setShadowDom(shadowBlock); // ✅ 設定 shadow block
+
+  //     this.setInputsInline(true);
+  //     this.setPreviousStatement(true, null);
+  //     this.setNextStatement(true, null);
+  //     this.setColour("#FF9900");
+  //     this.setTooltip("設定變數的值");
+  //     this.setHelpUrl("");
+  //   },
+  // };
+
+  
   Blockly.Blocks["scratch_variables_set"] = {
     init: function () {
       this.appendDummyInput()
         .appendField("變數")
-        .appendField(new Blockly.FieldVariable("變數名稱", undefined, [""]), "VAR")
+        .appendField(new Blockly.FieldVariable("", undefined, [""]), "VAR")
         .appendField("設為");
 
-      // ✅ 建立 shadow block
-      let shadowBlock = document.createElement("shadow");
-      shadowBlock.setAttribute("type", "scratch_text"); // ✅ 自定義 Scratch 文字輸入框
-      let field = document.createElement("field");
-      field.setAttribute("name", "TEXT"); // ✅ `scratch_text` 的正確 field 名稱應該是 TEXT
-      field.textContent = "0"; // ✅ 預設為 0
+      const shadowBlock = document.createElement("shadow");
+      shadowBlock.setAttribute("type", "scratch_text");
+      const field = document.createElement("field");
+      field.setAttribute("name", "TEXT");
+      field.textContent = "0";
       shadowBlock.appendChild(field);
 
       this.appendValueInput("VALUE")
-        .setCheck(["Number", "String"]) // ✅ 允許數字 & 文字
-        .connection.setShadowDom(shadowBlock); // ✅ 設定 shadow block
+        .setCheck(null)
+        .connection.setShadowDom(shadowBlock);
 
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
-      this.setColour("#FF9900");
-      this.setTooltip("設定變數的值");
-      this.setHelpUrl("");
+      this.setStyle("variable_blocks");
     },
   };
 
+  // javascriptGenerator.forBlock["scratch_variables_set"] = function (block) {
+  //   var argument0 = javascriptGenerator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
+  //   var varName = javascriptGenerator.nameDB_?.getName(
+  //     block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME
+  //   );
+
+  //   // ✅ 嘗試將 argument0 轉為數字，如果是純數字則轉型
+  //   var code = `${varName} = (isNaN(${argument0}) ? ${argument0} : Number(${argument0}));\n`;
+
+  //   return code;
+  // };
   javascriptGenerator.forBlock["scratch_variables_set"] = function (block) {
-    var argument0 = javascriptGenerator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
-    var varName = javascriptGenerator.nameDB_?.getName(
-      block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME
+    const varName = javascriptGenerator.nameDB_?.getName(
+      block.getFieldValue("VAR"),
+      Blockly.VARIABLE_CATEGORY_NAME,
     );
+    const value =
+      javascriptGenerator.valueToCode(block, "VALUE", Order.ASSIGNMENT) || "0";
 
-    // ✅ 嘗試將 argument0 轉為數字，如果是純數字則轉型
-    var code = `${varName} = (isNaN(${argument0}) ? ${argument0} : Number(${argument0}));\n`;
+    // If it's a string literal, check if it's numeric
+    if (value.startsWith('"') || value.startsWith("'")) {
+      const strValue = value.slice(1, -1);
+      if (!isNaN(parseFloat(strValue))) {
+        return `${varName} = ${Number(strValue)};\n`;
+      }
+    }
 
-    return code;
+    return `${varName} = ${value};\n`;
   };
 
 
   //不知道為甚麼要用math_change來實作variables_change但就先這樣好了不然好煩
+  // Blockly.Blocks["scratch_variables_change"] = {
+  //   init: function () {
+  //     this.appendDummyInput()
+  //       .appendField("變數")
+  //       .appendField(
+  //         new Blockly.FieldVariable("變數名稱", undefined, [""]),
+  //         "VAR")
+  //       .appendField("改變");
+
+  //     // ✅ 使用 appendValueInput 確保顯示白色橢圓輸入框
+  //     let valueInput = this.appendValueInput("DELTA").setCheck(null);
+
+  //     // ✅ 建立 shadow block
+  //     let shadowBlock = document.createElement("shadow");
+  //     shadowBlock.setAttribute("type", "math_number"); // 🔹 設定為數字輸入框
+  //     let field = document.createElement("field");
+  //     field.setAttribute("name", "NUM");
+  //     field.textContent = "1"; // 🔹 預設值
+  //     shadowBlock.appendChild(field);
+
+  //     // ✅ 設定 shadow block，讓輸入框變成 Scratch 樣式
+  //     valueInput.connection.setShadowDom(shadowBlock);
+
+  //     this.setInputsInline(true);
+  //     this.setPreviousStatement(true, null);
+  //     this.setNextStatement(true, null);
+  //     this.setColour("#FF9900"); // ✅ 設定 Scratch 變數積木顏色
+  //     this.setTooltip("改變變數的值");
+  //     this.setHelpUrl("");
+  //   },
+  // };
   Blockly.Blocks["scratch_variables_change"] = {
     init: function () {
-
-
       this.appendDummyInput()
         .appendField("變數")
-        .appendField(
-          new Blockly.FieldVariable("變數名稱", undefined, [""]),
-          "VAR")
+        .appendField(new Blockly.FieldVariable("", undefined, [""]), "VAR")
         .appendField("改變");
 
-      // ✅ 使用 appendValueInput 確保顯示白色橢圓輸入框
-      let valueInput = this.appendValueInput("DELTA").setCheck(null);
+      const valueInput = this.appendValueInput("DELTA").setCheck(null);
 
-      // ✅ 建立 shadow block
-      let shadowBlock = document.createElement("shadow");
-      shadowBlock.setAttribute("type", "math_number"); // 🔹 設定為數字輸入框
-      let field = document.createElement("field");
+      const shadowBlock = document.createElement("shadow");
+      shadowBlock.setAttribute("type", "math_number");
+      const field = document.createElement("field");
       field.setAttribute("name", "NUM");
-      field.textContent = "1"; // 🔹 預設值
+      field.textContent = "1";
       shadowBlock.appendChild(field);
 
-      // ✅ 設定 shadow block，讓輸入框變成 Scratch 樣式
       valueInput.connection.setShadowDom(shadowBlock);
 
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
-      this.setColour("#FF9900"); // ✅ 設定 Scratch 變數積木顏色
-      this.setTooltip("改變變數的值");
-      this.setHelpUrl("");
+      this.setStyle("variable_blocks");
     },
   };
 
+  // javascriptGenerator.forBlock["scratch_variables_change"] = function (block) {
+  //   var argument0 = javascriptGenerator.valueToCode(block, 'DELTA', Order.ADDITION) || '1';
+  //   var varName = javascriptGenerator.nameDB_?.getName(
+  //     block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME);
+  //   return varName + ' = (typeof ' + varName + ' == \'number\' ? ' + varName +
+  //     ' : 0) + ' + argument0 + ';\n';
+  // };
   javascriptGenerator.forBlock["scratch_variables_change"] = function (block) {
-    var argument0 = javascriptGenerator.valueToCode(block, 'DELTA', Order.ADDITION) || '1';
-    var varName = javascriptGenerator.nameDB_?.getName(
-      block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME);
-    return varName + ' = (typeof ' + varName + ' == \'number\' ? ' + varName +
-      ' : 0) + ' + argument0 + ';\n';
+    const varName = javascriptGenerator.nameDB_?.getName(
+      block.getFieldValue("VAR"),
+      Blockly.VARIABLE_CATEGORY_NAME,
+    );
+    const delta =
+      javascriptGenerator.valueToCode(block, "DELTA", Order.ADDITION) || "1";
+    return `${varName} = (typeof ${varName} == 'number' ? ${varName} : 0) + ${delta};\n`;
   };
 
 
@@ -871,6 +914,7 @@ export function initializeScratch() {
         .appendField(
           new Blockly.FieldVariable("變數名稱", undefined, [""]),
           "VAR")
+      this.setStyle("variable_blocks");
       this.setInputsInline(true);
       this.setOutput(true, null);
       this.setColour("#FF9900");
@@ -880,13 +924,14 @@ export function initializeScratch() {
 
     },
   };
+
   javascriptGenerator.forBlock["scratch_variables_get"] = function (block) {
-    var varName = javascriptGenerator.nameDB_?.getName(
-      block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME) || 'undefined_var';
-    return [varName, Order.ATOMIC]; // 確保回傳值符合 [string, number] 的型別要求
+    const varName = javascriptGenerator.nameDB_?.getName(
+      block.getFieldValue("VAR"),
+      Blockly.VARIABLE_CATEGORY_NAME,
+    ) as string;
+    return [varName, Order.ATOMIC];
   };
-
-
 
 
   // Get list (reporter)
@@ -1369,55 +1414,55 @@ export function initializeScratch() {
 
   Blockly.Blocks["scratch_list_contain"] = {
     init: function () {
-        this.appendDummyInput()
-            .appendField("清單") // ✅ 顯示標題
-            .appendField(
-                new Blockly.FieldVariable("myList", undefined, ["list"], "list"), // ✅ 只能選擇「清單」變數
-                "LIST"
-            )
-            .appendField("包含");
+      this.appendDummyInput()
+        .appendField("清單") // ✅ 顯示標題
+        .appendField(
+          new Blockly.FieldVariable("myList", undefined, ["list"], "list"), // ✅ 只能選擇「清單」變數
+          "LIST"
+        )
+        .appendField("包含");
 
-        let itemInput = this.appendValueInput("ITEM").setCheck(null); // ✅ 可輸入任何類型的數據
+      let itemInput = this.appendValueInput("ITEM").setCheck(null); // ✅ 可輸入任何類型的數據
 
-        // ✅ 設定 `ITEM` 的白色橢圓 Shadow Block（文字輸入框）
-        let itemShadow = document.createElement("shadow");
-        itemShadow.setAttribute("type", "scratch_text");
-        let itemField = document.createElement("field");
-        itemField.setAttribute("name", "TEXT");
-        itemField.textContent = "thing"; // 預設值
-        itemShadow.appendChild(itemField);
-        itemInput.connection.setShadowDom(itemShadow); // ✅ 讓 `ITEM` 變成 Scratch 樣式
+      // ✅ 設定 `ITEM` 的白色橢圓 Shadow Block（文字輸入框）
+      let itemShadow = document.createElement("shadow");
+      itemShadow.setAttribute("type", "scratch_text");
+      let itemField = document.createElement("field");
+      itemField.setAttribute("name", "TEXT");
+      itemField.textContent = "thing"; // 預設值
+      itemShadow.appendChild(itemField);
+      itemInput.connection.setShadowDom(itemShadow); // ✅ 讓 `ITEM` 變成 Scratch 樣式
 
-        this.appendDummyInput().appendField("?"); // ✅ 加上問號
+      this.appendDummyInput().appendField("?"); // ✅ 加上問號
 
-        this.setInputsInline(true); // ✅ 保持 Scratch 樣式
-        this.setOutput(true, "Boolean"); // ✅ 返回布林值
-        this.setStyle("list_blocks"); // ✅ 設定 Scratch 列表風格
-        this.setTooltip("檢查清單是否包含指定的元素");
+      this.setInputsInline(true); // ✅ 保持 Scratch 樣式
+      this.setOutput(true, "Boolean"); // ✅ 返回布林值
+      this.setStyle("list_blocks"); // ✅ 設定 Scratch 列表風格
+      this.setTooltip("檢查清單是否包含指定的元素");
     },
-};
+  };
 
 
-javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
-  const field = block.getField("LIST");
-  if (!field) {
+  javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
+    const field = block.getField("LIST");
+    if (!field) {
       console.warn("Field 'LIST' not found on block:", block);
       return ["false", Order.ATOMIC]; // 預設返回 false
-  }
+    }
 
-  var listName = javascriptGenerator.nameDB_?.getName(
+    var listName = javascriptGenerator.nameDB_?.getName(
       field.getText(),
       Blockly.Names.NameType.VARIABLE
-  ) || "undefined_list";
+    ) || "undefined_list";
 
-  let item = javascriptGenerator.valueToCode(block, "ITEM", Order.ATOMIC) || '""';
+    let item = javascriptGenerator.valueToCode(block, "ITEM", Order.ATOMIC) || '""';
 
-  return [
+    return [
       `(${listName} = ${listName} || [], 
       ${listName}.some(x => isNaN(x) ? String(x).trim() === String(${item}).trim() : Number(x) === Number(${item})))`,
       Order.ATOMIC
-  ];
-};
+    ];
+  };
 
 
   Blockly.Blocks["scratch_list_indexof"] = {
@@ -1446,7 +1491,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
           "LIST"
         )
         .appendField("裡的項目編號");
-  
+
       this.setInputsInline(true); // ✅ 保持 Scratch 樣式
       this.setOutput(true, "Number"); // ✅ 返回數字類型
       this.setStyle("list_blocks"); // ✅ 設定 Scratch 列表風格
@@ -1457,23 +1502,23 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
 
   javascriptGenerator.forBlock["scratch_list_indexof"] = function (block) {
     const listName = javascriptGenerator.nameDB_?.getName(
-        block.getFieldValue("LIST"),
-        Blockly.Names.NameType.VARIABLE
+      block.getFieldValue("LIST"),
+      Blockly.Names.NameType.VARIABLE
     ) || "undefined_list";
 
     let item = javascriptGenerator.valueToCode(block, "ITEM", Order.ATOMIC) || '""';
 
     return [
-        `(${listName} = ${listName} || [], 
+      `(${listName} = ${listName} || [], 
         ${listName}.map(x => isNaN(x) ? String(x).trim() : Number(x))
         .indexOf(isNaN(${item}) ? String(${item}).trim() : Number(${item})) + 1 || 0)`,
-        Order.ATOMIC
+      Order.ATOMIC
     ];
-};
+  };
 
 
-  
-  
+
+
 
 
 
@@ -1483,7 +1528,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
 
     addParameter: function (
       name: string,
-      type: ScratchFunctionParameter["type"]
+      type: ScratchFunctionParameter["type"],
     ) {
       const stackInput = this.getInput("STACK");
       const stackConnection = stackInput?.connection;
@@ -1499,18 +1544,18 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
         this.appendDummyInput(name).appendField(name);
       } else {
         const input = this.appendValueInput(name).setCheck(
-          type === "NumberString" ? ["Number", "String"] : "Boolean"
+          type === "NumberString" ? ["Number", "String"] : "Boolean",
         );
 
-        // const workspace = this.workspace;
-        // const paramBlock = workspace.newBlock("scratch_function_param");
-        // // paramBlock.setShadow(true); // alternative workaround to duplicated scratch_function_param blocks on deserialization
-        // paramBlock.setMovable(false);
-        // paramBlock.setFieldValue(name, "PARAM_NAME");
-        // paramBlock.initSvg();
-        // paramBlock.render();
+        const workspace = this.workspace;
+        const paramBlock = workspace.newBlock("scratch_function_param");
+        paramBlock.setShadow(true); // workaround to duplicated scratch_function_param blocks on deserialization and copy
+        paramBlock.setMovable(false);
+        paramBlock.setFieldValue(name, "PARAM_NAME");
+        paramBlock.initSvg();
+        paramBlock.render();
 
-        // input.connection!.connect(paramBlock.outputConnection);
+        input.connection!.connect(paramBlock.outputConnection);
       }
 
       if (stackInput) {
@@ -1521,7 +1566,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
           stackTarget.previousConnection
         ) {
           this.getInput("STACK")?.connection?.connect(
-            stackTarget.previousConnection
+            stackTarget.previousConnection,
           );
         }
       }
@@ -1563,7 +1608,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
           childNode = childNode as Element;
           const paramName = childNode.getAttribute("name");
           const paramType = childNode.getAttribute(
-            "type"
+            "type",
           ) as ScratchFunctionParameter["type"];
           if (paramName && paramType) {
             this.addParameter(paramName, paramType);
@@ -1572,7 +1617,6 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
       }
     },
   };
-
   Blockly.Blocks["scratch_function_create"] = {
     init: function () {
       this.appendDummyInput()
@@ -1599,7 +1643,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
   };
 
   javascriptGenerator.forBlock["scratch_function_definition"] = function (
-    block
+    block,
   ) {
     const funcName = block.getFieldValue("NAME");
     const branch = javascriptGenerator.statementToCode(block, "STACK");
@@ -1615,7 +1659,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
     init: function () {
       this.appendDummyInput("HEADER").appendField(
         new Blockly.FieldLabel(" "),
-        "NAME"
+        "NAME",
       );
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -1627,7 +1671,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
 
     addParameter: function (
       name: string,
-      type: ScratchFunctionParameter["type"]
+      type: ScratchFunctionParameter["type"],
     ) {
       if (!this.parameters_) this.parameters_ = [];
       this.parameters_.push({ name, type });
@@ -1635,7 +1679,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
       this.appendDummyInput("DUMMY_TEXT").appendField(name + ":");
       if (type !== "Label") {
         this.appendValueInput(name).setCheck(
-          type === "NumberString" ? ["Number", "String"] : "Boolean"
+          type === "NumberString" ? ["Number", "String"] : "Boolean",
         );
       }
     },
@@ -1649,7 +1693,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
       .map(
         (param) =>
           javascriptGenerator.valueToCode(block, param.name, Order.NONE) ||
-          "null"
+          "null",
       );
     return `${funcName}(${values.join(", ")});\n`;
   };
@@ -1658,74 +1702,10 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
     init: function () {
       this.appendDummyInput().appendField(
         new Blockly.FieldLabel(""),
-        "PARAM_NAME"
+        "PARAM_NAME",
       );
       this.setOutput(true, null);
       this.setStyle("procedure_parameter_blocks");
-
-      this.setOnChange((event: Blockly.Events.Abstract) => {
-        if (
-          event.type === Blockly.Events.BLOCK_MOVE ||
-          event.type === Blockly.Events.BLOCK_CREATE
-        ) {
-          this.checkContext();
-        }
-      });
-    },
-
-    checkContext: function () {
-      if (this.isInFlyout) return;
-
-      const parent = this.getParent();
-      if (!parent) return;
-
-      const paramName = this.getFieldValue("PARAM_NAME");
-      const workspace = this.workspace;
-      const functionBlocks: ScratchFunctionBlock[] = workspace.getBlocksByType(
-        "scratch_function_definition"
-      );
-
-      const ownerFunction = functionBlocks.find((block) =>
-        block.parameters_.some((param) => param.name === paramName)
-      );
-      if (!ownerFunction) return;
-
-      const ownerFunctionName = ownerFunction.getFieldValue("NAME");
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      let currentBlock: Blockly.Block | null = this;
-      let isInCorrectContext = false;
-      let currentFunctionName: string | null = null;
-
-      while (currentBlock) {
-        if (currentBlock.type === "scratch_function_definition") {
-          isInCorrectContext = currentBlock.id === ownerFunction.id;
-          if (!isInCorrectContext) {
-            currentFunctionName = currentBlock.getFieldValue("NAME");
-          }
-          break;
-        }
-        currentBlock = currentBlock.getParent();
-      }
-
-      this.setDisabledReason(!isInCorrectContext, "incorrect_context");
-      this.setWarningText(
-        isInCorrectContext ? null : "這個參數只能在它所屬的函式中使用"
-      );
-
-      if (isInCorrectContext) {
-        this.setWarningText(null);
-      } else if (currentFunctionName) {
-        this.setWarningText(
-          `此參數屬於函式 "${ownerFunctionName}"，不能在函式 "${currentFunctionName}" 裡使用`
-        );
-      } else {
-        this.setWarningText(`此參數只能函式 "${ownerFunctionName} 裡使用`);
-      }
-
-      // If the block is disabled and connected, disconnect it
-      if (!isInCorrectContext && this.outputConnection?.targetConnection) {
-        this.outputConnection.disconnect();
-      }
     },
 
     mutationToDom: function () {
@@ -1733,7 +1713,7 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
       container.setAttribute("name", this.getFieldValue("PARAM_NAME"));
       container.setAttribute(
         "paramtype",
-        this.outputConnection?.check_?.[0] || ""
+        this.outputConnection?.check_?.[0] || "",
       );
       return container;
     },
@@ -1753,6 +1733,363 @@ javascriptGenerator.forBlock["scratch_list_contain"] = function (block) {
   javascriptGenerator.forBlock["scratch_function_param"] = function (block) {
     return [block.getFieldValue("PARAM_NAME"), Order.ATOMIC];
   };
+
+
+  Blockly.Blocks["scratch_logic_compare"] = {
+    init: function () {
+      this.appendValueInput("A").setCheck(["Number", "String"]);
+
+      this.appendValueInput("B")
+        .setCheck(["Number", "String"])
+        .appendField(
+          new Blockly.FieldDropdown([
+            ["=", "EQ"],
+            ["≠", "NEQ"],
+            ["<", "LT"],
+            [">", "GT"],
+            ["≤", "LTE"],
+            ["≥", "GTE"],
+          ]),
+          "OP",
+        );
+
+      this.setInputsInline(true);
+      this.setOutput(true, "Boolean");
+      this.setStyle("calculation_blocks");
+    },
+  };
+
+  javascriptGenerator.forBlock["scratch_logic_compare"] = function (block) {
+    const operator = block.getFieldValue("OP");
+    const order = Order.RELATIONAL;
+    let argument0: string | number =
+      javascriptGenerator.valueToCode(block, "A", order) || "0";
+    let argument1: string | number =
+      javascriptGenerator.valueToCode(block, "B", order) || "0";
+
+    const operators: { [key: string]: string } = {
+      EQ: "===",
+      NEQ: "!==",
+      LT: "<",
+      GT: ">",
+      LTE: "<=",
+      GTE: ">=",
+    };
+
+    function isNumericString(str: string) {
+      if (!str.startsWith('"') && !str.startsWith("'")) return false;
+      const value = str.slice(1, -1);
+      return !isNaN(parseFloat(value));
+    }
+
+    const isArg0String = argument0.startsWith('"') || argument0.startsWith("'");
+    const isArg1String = argument1.startsWith('"') || argument1.startsWith("'");
+
+    // If both are string literals, check if they're both numbers
+    if (isArg0String && isArg1String) {
+      if (isNumericString(argument0) && isNumericString(argument1)) {
+        // Convert both to numbers
+        argument0 = parseFloat(argument0.slice(1, -1));
+        argument1 = parseFloat(argument1.slice(1, -1));
+      }
+    } else if (isArg0String || isArg1String) {
+      // If only one is a string literal and it's not numeric, convert both to strings
+      if (
+        (isArg0String && !isNumericString(argument0)) ||
+        (isArg1String && !isNumericString(argument1))
+      ) {
+        if (!isArg0String) {
+          argument0 = `String(${argument0})`;
+        }
+        if (!isArg1String) {
+          argument1 = `String(${argument1})`;
+        }
+      } else {
+        // One is a numeric string and one is a number, convert to numbers
+        if (isArg0String) argument0 = argument0.slice(1, -1);
+        if (isArg1String) argument1 = argument1.slice(1, -1);
+      }
+    }
+
+    const code = `${argument0} ${operators[operator]} ${argument1}`;
+    return [code, order];
+  };
+
+  // const functionMixin: ScratchFunctionBlock = {
+  //   parameters_: [] as ScratchFunctionParameter[],
+
+  //   addParameter: function (
+  //     name: string,
+  //     type: ScratchFunctionParameter["type"]
+  //   ) {
+  //     const stackInput = this.getInput("STACK");
+  //     const stackConnection = stackInput?.connection;
+  //     const stackTarget = stackConnection?.targetBlock();
+  //     if (stackInput) {
+  //       this.removeInput("STACK");
+  //     }
+
+  //     if (!this.parameters_) this.parameters_ = [];
+  //     this.parameters_.push({ name, type });
+
+  //     if (type === "Label") {
+  //       this.appendDummyInput(name).appendField(name);
+  //     } else {
+  //       const input = this.appendValueInput(name).setCheck(
+  //         type === "NumberString" ? ["Number", "String"] : "Boolean"
+  //       );
+
+  //       // const workspace = this.workspace;
+  //       // const paramBlock = workspace.newBlock("scratch_function_param");
+  //       // // paramBlock.setShadow(true); // alternative workaround to duplicated scratch_function_param blocks on deserialization
+  //       // paramBlock.setMovable(false);
+  //       // paramBlock.setFieldValue(name, "PARAM_NAME");
+  //       // paramBlock.initSvg();
+  //       // paramBlock.render();
+
+  //       // input.connection!.connect(paramBlock.outputConnection);
+  //     }
+
+  //     if (stackInput) {
+  //       this.appendStatementInput("STACK").setCheck(null);
+  //       if (
+  //         stackTarget &&
+  //         !stackTarget.disposed &&
+  //         stackTarget.previousConnection
+  //       ) {
+  //         this.getInput("STACK")?.connection?.connect(
+  //           stackTarget.previousConnection
+  //         );
+  //       }
+  //     }
+  //   },
+
+  //   mutationToDom: function () {
+  //     const container = Blockly.utils.xml.createElement("mutation");
+  //     const name = this.getField("NAME")?.getValue() || "";
+  //     container.setAttribute("name", name);
+
+  //     this.parameters_.forEach((param) => {
+  //       const xmlParam = Blockly.utils.xml.createElement("arg");
+  //       xmlParam.setAttribute("name", param.name);
+  //       xmlParam.setAttribute("type", param.type);
+  //       container.appendChild(xmlParam);
+  //     });
+
+  //     return container;
+  //   },
+
+  //   domToMutation: function (xmlElement: Element) {
+  //     if (!this.parameters_) this.parameters_ = [];
+
+  //     const name = xmlElement.getAttribute("name") || "";
+  //     const nameField = this.getField("NAME");
+  //     if (nameField) {
+  //       nameField.setValue(name);
+  //     }
+
+  //     const inputs = this.inputList.slice();
+  //     for (const input of inputs) {
+  //       if (!["HEADER", "STACK"].includes(input.name)) {
+  //         this.removeInput(input.name);
+  //       }
+  //     }
+
+  //     for (let i = 0, childNode; (childNode = xmlElement.childNodes[i]); i++) {
+  //       if (childNode.nodeName.toLowerCase() === "arg") {
+  //         childNode = childNode as Element;
+  //         const paramName = childNode.getAttribute("name");
+  //         const paramType = childNode.getAttribute(
+  //           "type"
+  //         ) as ScratchFunctionParameter["type"];
+  //         if (paramName && paramType) {
+  //           this.addParameter(paramName, paramType);
+  //         }
+  //       }
+  //     }
+  //   },
+  // };
+
+  // Blockly.Blocks["scratch_function_create"] = {
+  //   init: function () {
+  //     this.appendDummyInput()
+  //       .appendField("定義")
+  //       .appendField(new Blockly.FieldLabel("新積木"), "NAME");
+  //     this.setStyle("procedure_blocks");
+  //     this.setInputsInline(true);
+  //     this.parameters_ = [];
+  //   },
+  //   ...functionMixin,
+  // };
+
+  // Blockly.Blocks["scratch_function_definition"] = {
+  //   init: function () {
+  //     this.appendDummyInput("HEADER")
+  //       .appendField("定義")
+  //       .appendField(new Blockly.FieldLabel(" "), "NAME");
+  //     this.appendStatementInput("STACK").setCheck(null);
+  //     this.setStyle("procedure_blocks");
+  //     this.setInputsInline(true);
+  //     this.parameters_ = [];
+  //   },
+  //   ...functionMixin,
+  // };
+
+  // javascriptGenerator.forBlock["scratch_function_definition"] = function (
+  //   block
+  // ) {
+  //   const funcName = block.getFieldValue("NAME");
+  //   const branch = javascriptGenerator.statementToCode(block, "STACK");
+  //   // @ts-expect-error block is actually of type FunctionBlock
+  //   const params = (block.parameters_ as ScratchFunctionParameter[])
+  //     .filter((param) => param.type !== "Label")
+  //     .map((param) => param.name)
+  //     .join(", ");
+  //   return `function ${funcName}(${params}) {\n${branch}}\n`;
+  // };
+
+  // Blockly.Blocks["scratch_function_call"] = {
+  //   init: function () {
+  //     this.appendDummyInput("HEADER").appendField(
+  //       new Blockly.FieldLabel(" "),
+  //       "NAME"
+  //     );
+  //     this.setPreviousStatement(true, null);
+  //     this.setNextStatement(true, null);
+  //     this.setStyle("procedure_blocks");
+  //     this.setInputsInline(true);
+  //     this.parameters_ = [];
+  //   },
+  //   ...functionMixin,
+
+  //   addParameter: function (
+  //     name: string,
+  //     type: ScratchFunctionParameter["type"]
+  //   ) {
+  //     if (!this.parameters_) this.parameters_ = [];
+  //     this.parameters_.push({ name, type });
+
+  //     this.appendDummyInput("DUMMY_TEXT").appendField(name + ":");
+  //     if (type !== "Label") {
+  //       this.appendValueInput(name).setCheck(
+  //         type === "NumberString" ? ["Number", "String"] : "Boolean"
+  //       );
+  //     }
+  //   },
+  // };
+
+  // javascriptGenerator.forBlock["scratch_function_call"] = function (block) {
+  //   const funcName = block.getFieldValue("NAME");
+  //   // @ts-expect-error block is actually of type FunctionBlock
+  //   const values = (block.parameters_ as ScratchFunctionParameter[])
+  //     .filter((param) => param.type !== "Label")
+  //     .map(
+  //       (param) =>
+  //         javascriptGenerator.valueToCode(block, param.name, Order.NONE) ||
+  //         "null"
+  //     );
+  //   return `${funcName}(${values.join(", ")});\n`;
+  // };
+
+  // Blockly.Blocks["scratch_function_param"] = {
+  //   init: function () {
+  //     this.appendDummyInput().appendField(
+  //       new Blockly.FieldLabel(""),
+  //       "PARAM_NAME"
+  //     );
+  //     this.setOutput(true, null);
+  //     this.setStyle("procedure_parameter_blocks");
+
+  //     this.setOnChange((event: Blockly.Events.Abstract) => {
+  //       if (
+  //         event.type === Blockly.Events.BLOCK_MOVE ||
+  //         event.type === Blockly.Events.BLOCK_CREATE
+  //       ) {
+  //         this.checkContext();
+  //       }
+  //     });
+  //   },
+
+  //   checkContext: function () {
+  //     if (this.isInFlyout) return;
+
+  //     const parent = this.getParent();
+  //     if (!parent) return;
+
+  //     const paramName = this.getFieldValue("PARAM_NAME");
+  //     const workspace = this.workspace;
+  //     const functionBlocks: ScratchFunctionBlock[] = workspace.getBlocksByType(
+  //       "scratch_function_definition"
+  //     );
+
+  //     const ownerFunction = functionBlocks.find((block) =>
+  //       block.parameters_.some((param) => param.name === paramName)
+  //     );
+  //     if (!ownerFunction) return;
+
+  //     const ownerFunctionName = ownerFunction.getFieldValue("NAME");
+  //     // eslint-disable-next-line @typescript-eslint/no-this-alias
+  //     let currentBlock: Blockly.Block | null = this;
+  //     let isInCorrectContext = false;
+  //     let currentFunctionName: string | null = null;
+
+  //     while (currentBlock) {
+  //       if (currentBlock.type === "scratch_function_definition") {
+  //         isInCorrectContext = currentBlock.id === ownerFunction.id;
+  //         if (!isInCorrectContext) {
+  //           currentFunctionName = currentBlock.getFieldValue("NAME");
+  //         }
+  //         break;
+  //       }
+  //       currentBlock = currentBlock.getParent();
+  //     }
+
+  //     this.setDisabledReason(!isInCorrectContext, "incorrect_context");
+  //     this.setWarningText(
+  //       isInCorrectContext ? null : "這個參數只能在它所屬的函式中使用"
+  //     );
+
+  //     if (isInCorrectContext) {
+  //       this.setWarningText(null);
+  //     } else if (currentFunctionName) {
+  //       this.setWarningText(
+  //         `此參數屬於函式 "${ownerFunctionName}"，不能在函式 "${currentFunctionName}" 裡使用`
+  //       );
+  //     } else {
+  //       this.setWarningText(`此參數只能函式 "${ownerFunctionName} 裡使用`);
+  //     }
+
+  //     // If the block is disabled and connected, disconnect it
+  //     if (!isInCorrectContext && this.outputConnection?.targetConnection) {
+  //       this.outputConnection.disconnect();
+  //     }
+  //   },
+
+  //   mutationToDom: function () {
+  //     const container = Blockly.utils.xml.createElement("mutation");
+  //     container.setAttribute("name", this.getFieldValue("PARAM_NAME"));
+  //     container.setAttribute(
+  //       "paramtype",
+  //       this.outputConnection?.check_?.[0] || ""
+  //     );
+  //     return container;
+  //   },
+
+  //   domToMutation: function (xmlElement: Element) {
+  //     const name = xmlElement.getAttribute("name");
+  //     const paramType = xmlElement.getAttribute("paramtype");
+  //     if (name) {
+  //       this.setFieldValue(name, "PARAM_NAME");
+  //     }
+  //     if (paramType) {
+  //       this.setOutput(true, paramType);
+  //     }
+  //   },
+  // };
+
+  // javascriptGenerator.forBlock["scratch_function_param"] = function (block) {
+  //   return [block.getFieldValue("PARAM_NAME"), Order.ATOMIC];
+  // };
 }
 
 // Colors based on Scratch's color palette
@@ -1934,7 +2271,7 @@ export const scratchToolboxConfig = {
         },
         {
           kind: "block",
-          type: "controls_flow_statements",
+          type: "scratch_controls_flow_statements",
         },
       ],
     },
@@ -1949,7 +2286,8 @@ export const scratchToolboxConfig = {
         },
         {
           kind: "block",
-          type: "logic_compare",
+          // type: "logic_compare",
+          type: "scratch_logic_compare",
           inputs: {
             A: {
               shadow: {
