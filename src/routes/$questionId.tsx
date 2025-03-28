@@ -167,13 +167,20 @@ function CodeDrillTab({ questionData ,qid}: qProps) {
     const generatedXMLCode = useWorkspaceStore((state) => state.generatedXMLCode); // 取得 Blockly 產生的程式碼
     
     const storedData = localStorage.getItem("stulastsubmit");
-    var parsedLastData = storedData ? JSON.parse(storedData) : { questions: {1:[],2:[]} };
+    // var parsedLastData = storedData ? JSON.parse(storedData) : { questions: {1:[],2:[]} };
+    var parsedLastData = storedData ? JSON.parse(storedData) : { questions: {} };
+    if (!parsedLastData.questions[qid]) {
+        parsedLastData.questions[qid] = [];
+    }
+
     if (!questionData) return <p>載入中...</p>;
 
     const drillClick = async () => {
         try {
             // parsedLastData.questions[qid]..questions[qid]
-            // console.log(parsedLastData);
+            // console.log(parsedLastData);generatedCode
+            // console.log(generatedCode);
+            
             parsedLastData.questions[qid].push({
                 bs: currentMode,
                 code: generatedXMLCode,
@@ -195,7 +202,7 @@ function CodeDrillTab({ questionData ,qid}: qProps) {
             }
 
             setOutput(""); // 清空輸出
-            console.log(generatedCode);
+            // console.log(generatedCode);
             let sandbox = new Function(`${generatedCode}; return output_result_string;`);
             const result = sandbox();
             setOutput(result);

@@ -1737,10 +1737,11 @@ export function initializeScratch() {
 
   Blockly.Blocks["scratch_logic_compare"] = {
     init: function () {
-      this.appendValueInput("A").setCheck(["Number", "String"]);
-
+      // this.appendValueInput("A").setCheck(["Number", "String"]);
+      this.appendValueInput("A").setCheck(null);
       this.appendValueInput("B")
-        .setCheck(["Number", "String"])
+        // .setCheck(["Number", "String"])
+        .setCheck(null)
         .appendField(
           new Blockly.FieldDropdown([
             ["=", "EQ"],
@@ -1758,15 +1759,12 @@ export function initializeScratch() {
       this.setStyle("calculation_blocks");
     },
   };
-
   javascriptGenerator.forBlock["scratch_logic_compare"] = function (block) {
     const operator = block.getFieldValue("OP");
     const order = Order.RELATIONAL;
-    let argument0: string | number =
-      javascriptGenerator.valueToCode(block, "A", order) || "0";
-    let argument1: string | number =
-      javascriptGenerator.valueToCode(block, "B", order) || "0";
-
+    let A = javascriptGenerator.valueToCode(block, "A", order) || "0";
+    let B = javascriptGenerator.valueToCode(block, "B", order) || "0";
+  
     const operators: { [key: string]: string } = {
       EQ: "===",
       NEQ: "!==",
@@ -1775,45 +1773,82 @@ export function initializeScratch() {
       LTE: "<=",
       GTE: ">=",
     };
-
-    function isNumericString(str: string) {
-      if (!str.startsWith('"') && !str.startsWith("'")) return false;
-      const value = str.slice(1, -1);
-      return !isNaN(parseFloat(value));
+  
+    const isLiteralString = (v: string): boolean =>
+      typeof v === "string" && (v.startsWith('"') || v.startsWith("'"));
+  
+    // 決定比較方式：
+    let code = "";
+  
+    if (!isLiteralString(A) && !isLiteralString(B)) {
+      // 都不是字串字面值，進行數值比較
+      A = `Number(${A})`;
+      B = `Number(${B})`;
+    } else {
+      // 任一是字串，則都轉成字串比較
+      A = `String(${A})`;
+      B = `String(${B})`;
     }
-
-    const isArg0String = argument0.startsWith('"') || argument0.startsWith("'");
-    const isArg1String = argument1.startsWith('"') || argument1.startsWith("'");
-
-    // If both are string literals, check if they're both numbers
-    if (isArg0String && isArg1String) {
-      if (isNumericString(argument0) && isNumericString(argument1)) {
-        // Convert both to numbers
-        argument0 = parseFloat(argument0.slice(1, -1));
-        argument1 = parseFloat(argument1.slice(1, -1));
-      }
-    } else if (isArg0String || isArg1String) {
-      // If only one is a string literal and it's not numeric, convert both to strings
-      if (
-        (isArg0String && !isNumericString(argument0)) ||
-        (isArg1String && !isNumericString(argument1))
-      ) {
-        if (!isArg0String) {
-          argument0 = `String(${argument0})`;
-        }
-        if (!isArg1String) {
-          argument1 = `String(${argument1})`;
-        }
-      } else {
-        // One is a numeric string and one is a number, convert to numbers
-        if (isArg0String) argument0 = argument0.slice(1, -1);
-        if (isArg1String) argument1 = argument1.slice(1, -1);
-      }
-    }
-
-    const code = `${argument0} ${operators[operator]} ${argument1}`;
+  
+    code = `${A} ${operators[operator]} ${B}`;
     return [code, order];
   };
+  
+  // javascriptGenerator.forBlock["scratch_logic_compare"] = function (block) {
+  //   const operator = block.getFieldValue("OP");
+  //   const order = Order.RELATIONAL;
+  //   let argument0: string | number =
+  //     javascriptGenerator.valueToCode(block, "A", order) || "0";
+  //   let argument1: string | number =
+  //     javascriptGenerator.valueToCode(block, "B", order) || "0";
+
+  //   const operators: { [key: string]: string } = {
+  //     EQ: "===",
+  //     NEQ: "!==",
+  //     LT: "<",
+  //     GT: ">",
+  //     LTE: "<=",
+  //     GTE: ">=",
+  //   };
+
+  //   function isNumericString(str: string) {
+  //     if (!str.startsWith('"') && !str.startsWith("'")) return false;
+  //     const value = str.slice(1, -1);
+  //     return !isNaN(parseFloat(value));
+  //   }
+
+  //   const isArg0String = argument0.startsWith('"') || argument0.startsWith("'");
+  //   const isArg1String = argument1.startsWith('"') || argument1.startsWith("'");
+
+  //   // If both are string literals, check if they're both numbers
+  //   if (isArg0String && isArg1String) {
+  //     if (isNumericString(argument0) && isNumericString(argument1)) {
+  //       // Convert both to numbers
+  //       argument0 = parseFloat(argument0.slice(1, -1));
+  //       argument1 = parseFloat(argument1.slice(1, -1));
+  //     }
+  //   } else if (isArg0String || isArg1String) {
+  //     // If only one is a string literal and it's not numeric, convert both to strings
+  //     if (
+  //       (isArg0String && !isNumericString(argument0)) ||
+  //       (isArg1String && !isNumericString(argument1))
+  //     ) {
+  //       if (!isArg0String) {
+  //         argument0 = `String(${argument0})`;
+  //       }
+  //       if (!isArg1String) {
+  //         argument1 = `String(${argument1})`;
+  //       }
+  //     } else {
+  //       // One is a numeric string and one is a number, convert to numbers
+  //       if (isArg0String) argument0 = argument0.slice(1, -1);
+  //       if (isArg1String) argument1 = argument1.slice(1, -1);
+  //     }
+  //   }
+
+  //   const code = `${argument0} ${operators[operator]} ${argument1}`;
+  //   return [code, order];
+  // };
 
   // const functionMixin: ScratchFunctionBlock = {
   //   parameters_: [] as ScratchFunctionParameter[],
@@ -2291,17 +2326,19 @@ export const scratchToolboxConfig = {
           inputs: {
             A: {
               shadow: {
-                type: "math_number",
+                type: "scratch_text",
                 fields: {
-                  NUM: "",
+                  // NUM: "0",
+                  TEXT: "0",
                 },
               },
             },
             B: {
               shadow: {
-                type: "math_number",
+                type: "scratch_text",
                 fields: {
-                  NUM: "",
+                  // NUM: "0",
+                  TEXT: "0",
                 },
               },
             },
