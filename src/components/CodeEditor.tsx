@@ -239,9 +239,13 @@ export function CodeEditor() {
           listFlyoutCallback,
         );
         workspace.registerButtonCallback("CREATE_SCRATCH_LIST", () => {
+          const originalNewVariableTitleMsg = Blockly.Msg.NEW_VARIABLE_TITLE;
+				  Blockly.Msg.NEW_VARIABLE_TITLE = "新清單名稱：";
           Blockly.Variables.createVariableButtonHandler(
             workspace,
-            undefined,
+            () => {
+              Blockly.Msg.NEW_VARIABLE_TITLE = originalNewVariableTitleMsg;
+            },
             "list",
           );
         });
