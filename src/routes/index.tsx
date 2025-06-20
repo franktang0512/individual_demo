@@ -10,10 +10,16 @@ interface Question {
   iconUrl: string;
 }
 
-// ✅ 題目清單
+// 第一次示範賽前(20250412)題目清單
+// const questionList: Question[] = [
+//   { id: 1, name: "刮刮樂", iconUrl: icon1 },
+//   { id: 2, name: "活動分組", iconUrl: icon2 },
+// ];
+
+//202507研習demo
 const questionList: Question[] = [
-  { id: 1, name: "刮刮樂", iconUrl: icon1 },
-  { id: 2, name: "活動分組", iconUrl: icon2 },
+  { id: 1, name: "可口便當", iconUrl: icon1 },
+  { id: 2, name: "短片欣賞", iconUrl: icon2 },
 ];
 
 function Index() {

@@ -158,14 +158,14 @@ function IntroTab({ questionData }: { questionData: any }) {
     );
 }
 
-function CodeDrillTab({ questionData ,qid}: qProps) {
+function CodeDrillTab({ questionData, qid }: qProps) {
     const [activeExample, setActiveExample] = useState<string | null>(null);
     const [output, setOutput] = useState<string>("");
 
     const currentMode = useWorkspaceStore((state) => state.currentMode); // 取得 Blockly 或 Scratch 模式
     const generatedCode = useWorkspaceStore((state) => state.generatedCode); // 取得 Blockly 產生的程式碼
     const generatedXMLCode = useWorkspaceStore((state) => state.generatedXMLCode); // 取得 Blockly 產生的程式碼
-    
+
     const storedData = localStorage.getItem("stulastsubmit");
     // var parsedLastData = storedData ? JSON.parse(storedData) : { questions: {1:[],2:[]} };
     var parsedLastData = storedData ? JSON.parse(storedData) : { questions: {} };
@@ -180,7 +180,7 @@ function CodeDrillTab({ questionData ,qid}: qProps) {
             // parsedLastData.questions[qid]..questions[qid]
             // console.log(parsedLastData);generatedCode
             // console.log(generatedCode);
-            
+
             parsedLastData.questions[qid].push({
                 bs: currentMode,
                 code: generatedXMLCode,
@@ -214,24 +214,24 @@ function CodeDrillTab({ questionData ,qid}: qProps) {
     const returnCodeClick = () => {
         const storedData = localStorage.getItem("stulastsubmit");
         const parsedData = storedData ? JSON.parse(storedData) : { questions: {} };
-    
+
         // 確保該題目有提交過程式碼
         if (!parsedData.questions[qid] || parsedData.questions[qid].length === 0) {
             return; // **如果沒有提交過，直接返回，不做任何操作**
         }
-    
+
         // 取得該題的最新提交記錄
         const lastSubmission = parsedData.questions[qid][parsedData.questions[qid].length - 1];
         const lastMode = lastSubmission.bs; // Blockly 或 Scratch
         const lastXML = lastSubmission.code ?? `<xml xmlns="https://developers.google.com/blockly/xml"></xml>`;
-    
+
         // 切換到對應的模式（Blockly / Scratch）
         if (lastMode === "Scratch") {
             useWorkspaceStore.setState({ currentMode: "Scratch" });
         } else {
             useWorkspaceStore.setState({ currentMode: "Blockly" });
         }
-    
+
         // **確保模式切換後載入程式碼**
         setTimeout(() => {
             useWorkspaceStore.setState({ recordXMLCode: "" }); // 先清空 XML
@@ -241,7 +241,7 @@ function CodeDrillTab({ questionData ,qid}: qProps) {
             }, 50);
         }, 50);
     };
-    
+
 
     //worker沒有瀏覽器 所以有windows prompt的話都會報錯，因此使用者如果程式crash的話自己要承擔
     // const drillClick = () => {
@@ -808,363 +808,686 @@ function Question({ id }: { id: number }) {
     const setGeneratedCode = useWorkspaceStore((state) => state.setGeneratedCode);
     const setGeneratedXMLCode = useWorkspaceStore((state) => state.setGeneratedXMLCode);
 
+    //第一次示範賽前demo(20250412)
+    // const questions: Record<number, any> = {
+    //     1: {
+    //         title: "刮刮樂",
+    //         statements: [
+    //             {
+    //                 text: "百貨公司週年慶期間發出多張刮刮樂卡，刮開的數字若正讀或反讀皆一致，就可換取獎品一份。\n給定刮刮樂卡的起、迄數字，計算總共該準備幾份贈品。\n\n刮刮樂卡的起迄數字皆介於 1 及 999999。"
+    //             },
+    //             {
+    //                 table: ""
+    //             }
+    //         ],
+    //         example_cases: [
+    //             {
+    //                 title: "範例一",
+    //                 input: "10 99",
+    //                 output: "9",
+    //                 description: "刮刮樂卡的起始號碼為 10，結束號碼為 99。\n其中刮開的數字 11、22、33、44、55、66、77、88、99 之正讀、反讀皆一致，因此共需準備 9 份贈品。"
+    //             },
+    //             {
+    //                 title: "範例二",
+    //                 input: "11112 19999",
+    //                 output: "88",
+    //                 description: "刮刮樂卡的起始號碼為 11112，結束號碼為 19999。\n其中刮開的數字 11211、11311、...、11911、12021、12121、...、12921、...、19091、19191、...、19991 之正讀、反讀皆一致，因此共需準備 88 份贈品。"
+    //             }
+    //         ],
+    //         cases: [
+    //             {
+    //                 group_title: "只測試個位數",
+    //                 subcase: [
+    //                     {
+    //                         case_title: "情況一",
+    //                         input: "0 1",
+    //                         output: "2",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況二",
+    //                         input: "1 1",
+    //                         output: "1",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況三",
+    //                         input: "0 9",
+    //                         output: "10",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況四",
+    //                         input: "5 8",
+    //                         output: "4",
+    //                         score: "4"
+    //                     }
+    //                 ]
+    //             },
+    //             {
+    //                 group_title: "只測試兩位數",
+    //                 subcase: [
+    //                     {
+    //                         case_title: "情況一",
+    //                         input: "10 99",
+    //                         output: "9",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況二",
+    //                         input: "31 89",
+    //                         output: "6",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況三",
+    //                         input: "19 21",
+    //                         output: "0",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況四",
+    //                         input: "99 99",
+    //                         output: "1",
+    //                         score: "4"
+    //                     }
+    //                 ]
+    //             },
+    //             {
+    //                 group_title: "只測試三位數",
+    //                 subcase: [
+    //                     {
+    //                         case_title: "情況一",
+    //                         input: "100 999",
+    //                         output: "90",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況二",
+    //                         input: "111 444",
+    //                         output: "34",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況三",
+    //                         input: "888 999",
+    //                         output: "12",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況四",
+    //                         input: "370 666",
+    //                         output: "30",
+    //                         score: "4"
+    //                     }
+    //                 ]
+    //             },
+    //             {
+    //                 group_title: "只測試四位數",
+    //                 subcase: [
+    //                     {
+    //                         case_title: "情況一",
+    //                         input: "1000 9999",
+    //                         output: "90",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況二",
+    //                         input: "2345 6789",
+    //                         output: "44",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況三",
+    //                         input: "1111 1112",
+    //                         output: "1",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況四",
+    //                         input: "1201 9087",
+    //                         output: "79",
+    //                         score: "4"
+    //                     }
+    //                 ]
+    //             },
+    //             {
+    //                 group_title: "只測試五位數",
+    //                 subcase: [
+    //                     {
+    //                         case_title: "情況一",
+    //                         input: "10000 99999",
+    //                         output: "900",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況二",
+    //                         input: "11111 11111",
+    //                         output: "1",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況三",
+    //                         input: "79797 97979",
+    //                         output: "183",
+    //                         score: "4"
+    //                     },
+    //                     {
+    //                         case_title: "情況四",
+    //                         input: "12345 67890",
+    //                         output: "555",
+    //                         score: "4"
+    //                     }
+    //                 ]
+    //             },
+    //             {
+    //                 group_title: "只測試六位數",
+    //                 subcase: [
+    //                     {
+    //                         case_title: "情況一",
+    //                         input: "100000 999999",
+    //                         output: "900",
+    //                         score: "5"
+    //                     },
+    //                     {
+    //                         case_title: "情況二",
+    //                         input: "123456 567890",
+    //                         output: "444",
+    //                         score: "5"
+    //                     },
+    //                     {
+    //                         case_title: "情況三",
+    //                         input: "797979 979797",
+    //                         output: "181",
+    //                         score: "5"
+    //                     },
+    //                     {
+    //                         case_title: "情況四",
+    //                         input: "111111 111111",
+    //                         output: "1",
+    //                         score: "5"
+    //                     }
+    //                 ]
+    //             }
+    //         ]
+    //     },
+    //     2: {
+    //         title: "活動分組",
+    //         statements: [
+    //             {
+    //                 text: "栗栗國中社團迎新共有 15 個活動（編號 1 至 15 ），依序輸入每位新生報名參加的活動，最後輸入 -1 代表輸入完畢。\n\n請列出尚未有新生報名的活動有哪些。若所有活動皆有新生報名，則顯示「無」。"
+    //             }
+    //         ],
+    //         example_cases: [
+    //             {
+    //                 title: "範例一",
+    //                 input: "1 4 2 6 10 11 5 15 12 13 14 8 -1",
+    //                 output: "3 7 9",
+    //                 description: "新生們依序報名了編號為 1、4、2、6、10、11 、5、15、12、13、14、8 的活動 (-1表示結束)。因此編號 3、7、9 的活動未有新生報名。"
+    //             },
+    //             {
+    //                 title: "範例二",
+    //                 input: "7 3 9 12 1 15 6 10 4 14 9 2 9 13 8 5 11 -1",
+    //                 output: "無",
+    //                 description: "新生們依序報名了編號為 7、3、9、12、1、15、6、10、4、14、9、2、9、13、8、5、11 的活動 (-1表示結束)。因此所有活動皆有新生報名。"
+    //             }
+    //         ],
+    //         "cases": [
+    //             {
+    //                 "group_title": "所有活動都沒有新生報名",
+    //                 "subcase": [
+    //                     {
+    //                         "case_title": "情況一",
+    //                         "input": "0 -1",
+    //                         "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況二",
+    //                         "input": "-1",
+    //                         "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況三",
+    //                         "input": "16 -1",
+    //                         "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況四",
+    //                         "input": "10000 -1",
+    //                         "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況五",
+    //                         "input": "0 0 0 0 0 -1",
+    //                         "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+    //                         "score": "5"
+    //                     }
+    //                 ]
+    //             },
+    //             {
+    //                 "group_title": "部分活動有新生報名",
+    //                 "subcase": [
+    //                     {
+    //                         "case_title": "情況一",
+    //                         "input": "13 1 4 2 6 1 8 2 3 2 14 -1",
+    //                         "output": "5 7 9 10 11 12 15",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況二",
+    //                         "input": "2 8 2 3 3 8 4 5 15 15 7 7 13 5 11 8 6 4 12 9 6 -1",
+    //                         "output": "1 10 14",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況三",
+    //                         "input": "5 10 9 1 1 10 8 15 10 9 4 15 1 15 10 11 9 5 3 9 -1",
+    //                         "output": "2 6 7 12 13 14",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況四",
+    //                         "input": "10 8 2 3 3 3 14 13 4 12 -1",
+    //                         "output": "1 5 6 7 9 11 15",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況五",
+    //                         "input": "8 6 4 13 10 8 12 8 9 5 2 1 2 8 9 12 8 14 2 6 -1",
+    //                         "output": "3 7 11 15",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況六",
+    //                         "input": "3 13 5 7 13 9 13 14 9 11 7 3 9 10 9 3 3 10 14 6 15 10 13 2 9 12 8 -1",
+    //                         "output": "1 4",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況七",
+    //                         "input": "15 1 15 12 5 9 9 11 3 12 7 2 4 15 -1",
+    //                         "output": "6 8 10 13 14",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況八",
+    //                         "input": "1 1 1 1 -1",
+    //                         "output": "2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況九",
+    //                         "input": "15 1 15 12 5 16 9 9 11 3 12 7 0 4 15 -1",
+    //                         "output": "2 6 8 10 13 14",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況十",
+    //                         "input": "1 4 2 6 10 11 5 15 12 13 14 8 -1",
+    //                         "output": "3 7 9",
+    //                         "score": "5"
+    //                     }
+    //                 ]
+    //             },
+    //             {
+    //                 "group_title": "所有活動都有新生報名",
+    //                 "subcase": [
+    //                     {
+    //                         "case_title": "情況一",
+    //                         "input": "14 14 12 15 15 11 1 1 13 7 5 9 6 11 1 3 15 13 14 2 13 6 13 4 6 2 10 6 8 -1",
+    //                         "output": "無",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況二",
+    //                         "input": "1 3 5 7 9 8 4 6 2 10 15 13 12 14 11 -1",
+    //                         "output": "無",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況三",
+    //                         "input": "1 1 7 6 15 12 9 3 1 5 4 1 14 4 13 2 10 6 11 7 9 7 4 15 9 8 11 4 -1",
+    //                         "output": "無",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況四",
+    //                         "input": "1000 99 123 1 1 7 6 15 12 9 3 1 5 4 1 14 4 13 2 10 6 11 7 9 7 4 15 9 8 11 4 -1",
+    //                         "output": "無",
+    //                         "score": "5"
+    //                     },
+    //                     {
+    //                         "case_title": "情況五",
+    //                         "input": "1000 99 123 1 1 7 6 15 12 9 3 1 5 4 1 14 4 13 2 10 6 11 7 9 7 4 15 9 8 11 4 -1",
+    //                         "output": "無",
+    //                         "score": "5"
+    //                     }
+    //                 ]
+    //             }
+    //         ]
+    //     }
+    // };
 
+
+    //202507研習demo
     const questions: Record<number, any> = {
         1: {
-            title: "刮刮樂",
+            title: "可口便當",
             statements: [
                 {
-                    text: "百貨公司週年慶期間發出多張刮刮樂卡，刮開的數字若正讀或反讀皆一致，就可換取獎品一份。\n給定刮刮樂卡的起、迄數字，計算總共該準備幾份贈品。\n\n刮刮樂卡的起迄數字皆介於 1 及 999999。"
+                    "text": "可口便當主廚每天早上會先檢視每筆訂單上的套餐 （最多 9 種套餐，套餐編號為 1, 2, 3, …, 9 )，再列出當天套餐應該烹煮的先後順序。請依據訂單資訊與主廚準備便當的順序，列舉出所有套餐被處理的順序。"
                 },
                 {
-                    table: ""
+                    "table": ""
                 }
             ],
             example_cases: [
                 {
                     title: "範例一",
-                    input: "10 99",
-                    output: "9",
-                    description: "刮刮樂卡的起始號碼為 10，結束號碼為 99。\n其中刮開的數字 11、22、33、44、55、66、77、88、99 之正讀、反讀皆一致，因此共需準備 9 份贈品。"
+                    input: "5\n8 9 9 9 8\n2\n9 8",
+                    output: "9 9 9 8 8",
+                    description: "總共有 5 筆訂單，\n訂單上的套餐編號依序為 8 9 9 9 8。\n總共有 2 個不同套餐，\n主廚決定套餐的烹煮順序為 9 8。\n\n因此需先處理三個 9 號餐，再處理兩個 8 號餐。因此訂單上套餐處理順序為 9 9 9 8 8。"
                 },
                 {
                     title: "範例二",
-                    input: "11112 19999",
-                    output: "88",
-                    description: "刮刮樂卡的起始號碼為 11112，結束號碼為 19999。\n其中刮開的數字 11211、11311、...、11911、12021、12121、...、12921、...、19091、19191、...、19991 之正讀、反讀皆一致，因此共需準備 88 份贈品。"
+                    input: "7\n3 1 4 1 5 9 3\n5\n1 9 4 3 5",
+                    output: "1 1 9 4 3 3 5",
+                    description: "總共有 7 筆訂單，\n訂單上的套餐編號依序為 3 1 4 1 5 9 3。\n總共有 5 個不同套餐，\n主廚決定套餐的烹煮順序為 1 9 4 3 5。\n\n先處理兩個 1 號餐，再依序處理 9, 4 號餐，再處理兩個 3 號餐，最後才處理 5 號餐。因此訂單上套餐處理順序為 1 1 9 4 3 3 5。"
                 }
             ],
+
             cases: [
                 {
-                    group_title: "只測試個位數",
+                    group_title: "套餐不會重複出現",
                     subcase: [
                         {
-                            case_title: "情況一",
-                            input: "0 1",
-                            output: "2",
+                            case_title: "A1",
+                            input: "9 1 2 3 4 5 6 7 8 9 9 9 8 7 6 5 4 3 2 1",
+                            output: "9 8 7 6 5 4 3 2 1",
                             score: "4"
                         },
                         {
-                            case_title: "情況二",
-                            input: "1 1",
+                            case_title: "A2",
+                            input: "1 1 1 1",
                             output: "1",
                             score: "4"
                         },
                         {
-                            case_title: "情況三",
-                            input: "0 9",
-                            output: "10",
+                            case_title: "A3",
+                            input: "5 5 3 1 4 2 5 2 3 1 5 4",
+                            output: "2 3 1 5 4",
                             score: "4"
                         },
                         {
-                            case_title: "情況四",
-                            input: "5 8",
-                            output: "4",
+                            case_title: "A4",
+                            input: "8 9 8 7 6 5 4 3 2 8 9 8 7 6 5 4 3 2",
+                            output: "9 8 7 6 5 4 3 2",
+                            score: "4"
+                        },
+                        {
+                            case_title: "A5",
+                            input: "8 9 8 7 6 5 4 3 2 8 2 3 4 5 6 7 8 9",
+                            output: "2 3 4 5 6 7 8 9",
                             score: "4"
                         }
                     ]
                 },
                 {
-                    group_title: "只測試兩位數",
+                    group_title: "訂單只出現兩種套餐",
                     subcase: [
                         {
-                            case_title: "情況一",
-                            input: "10 99",
-                            output: "9",
+                            case_title: "B1",
+                            input: "3 1 2 2 2 1 2",
+                            output: "1 2 2",
                             score: "4"
                         },
                         {
-                            case_title: "情況二",
-                            input: "31 89",
-                            output: "6",
+                            case_title: "B2",
+                            input: "3 1 2 2 2 2 1",
+                            output: "2 2 1",
                             score: "4"
                         },
                         {
-                            case_title: "情況三",
-                            input: "19 21",
-                            output: "0",
+                            case_title: "B3",
+                            input: "10 7 7 7 7 9 9 9 9 9 9 2 7 9",
+                            output: "7 7 7 7 9 9 9 9 9 9",
                             score: "4"
                         },
                         {
-                            case_title: "情況四",
-                            input: "99 99",
-                            output: "1",
+                            case_title: "B4",
+                            input: "12 3 8 3 8 3 8 3 8 3 8 3 8 2 8 3",
+                            output: "8 8 8 8 8 8 3 3 3 3 3 3",
+                            score: "4"
+                        },
+                        {
+                            case_title: "B5",
+                            input: "12 7 9 9 7 7 9 7 7 9 9 9 9 2 9 7",
+                            output: "9 9 9 9 9 9 9 7 7 7 7 7",
                             score: "4"
                         }
                     ]
                 },
                 {
-                    group_title: "只測試三位數",
+                    group_title: "套餐會重複出現",
                     subcase: [
                         {
-                            case_title: "情況一",
-                            input: "100 999",
-                            output: "90",
-                            score: "4"
+                            case_title: "C1",
+                            input: "6 2 3 3 1 2 2 3 2 1 3",
+                            output: "2 2 2 1 3 3",
+                            score: "6"
                         },
                         {
-                            case_title: "情況二",
-                            input: "111 444",
-                            output: "34",
-                            score: "4"
+                            case_title: "C2",
+                            input: "8 5 6 6 6 7 5 7 5 3 5 7 6",
+                            output: "5 5 5 7 7 6 6 6",
+                            score: "6"
                         },
                         {
-                            case_title: "情況三",
-                            input: "888 999",
-                            output: "12",
-                            score: "4"
+                            case_title: "C3",
+                            input: "10 9 9 1 1 1 1 3 3 3 3 3 1 9 3",
+                            output: "1 1 1 1 9 9 3 3 3 3",
+                            score: "6"
                         },
                         {
-                            case_title: "情況四",
-                            input: "370 666",
-                            output: "30",
-                            score: "4"
-                        }
-                    ]
-                },
-                {
-                    group_title: "只測試四位數",
-                    subcase: [
-                        {
-                            case_title: "情況一",
-                            input: "1000 9999",
-                            output: "90",
-                            score: "4"
+                            case_title: "C4",
+                            input: "7 7 8 8 8 7 7 7 2 8 7",
+                            output: "8 8 8 7 7 7 7",
+                            score: "6"
                         },
                         {
-                            case_title: "情況二",
-                            input: "2345 6789",
-                            output: "44",
-                            score: "4"
+                            case_title: "C5",
+                            input: "20 5 5 5 5 5 5 5 5 5 5 9 9 9 9 9 9 9 9 9 9 2 9 5",
+                            output: "9 9 9 9 9 9 9 9 9 9 5 5 5 5 5 5 5 5 5 5",
+                            score: "6"
                         },
                         {
-                            case_title: "情況三",
-                            input: "1111 1112",
-                            output: "1",
-                            score: "4"
+                            case_title: "C6",
+                            input: "12 2 1 4 2 3 5 1 3 2 4 5 1 5 5 4 3 2 1",
+                            output: "5 5 4 4 3 3 2 2 2 1 1 1",
+                            score: "6"
                         },
                         {
-                            case_title: "情況四",
-                            input: "1201 9087",
-                            output: "79",
-                            score: "4"
-                        }
-                    ]
-                },
-                {
-                    group_title: "只測試五位數",
-                    subcase: [
-                        {
-                            case_title: "情況一",
-                            input: "10000 99999",
-                            output: "900",
-                            score: "4"
+                            case_title: "C7",
+                            input: "15 6 7 6 8 6 7 7 8 6 6 7 8 7 8 8 3 8 6 7",
+                            output: "8 8 8 8 8 6 6 6 6 6 7 7 7 7 7",
+                            score: "6"
                         },
                         {
-                            case_title: "情況二",
-                            input: "11111 11111",
-                            output: "1",
-                            score: "4"
+                            case_title: "C8",
+                            input: "10 8 1 8 3 3 8 2 8 2 3 4 1 2 3 8",
+                            output: "1 2 2 3 3 3 8 8 8 8",
+                            score: "6"
                         },
                         {
-                            case_title: "情況三",
-                            input: "79797 97979",
-                            output: "183",
-                            score: "4"
+                            case_title: "C9",
+                            input: "4 7 7 8 8 2 7 8",
+                            output: "7 7 8 8",
+                            score: "6"
                         },
                         {
-                            case_title: "情況四",
-                            input: "12345 67890",
-                            output: "555",
-                            score: "4"
-                        }
-                    ]
-                },
-                {
-                    group_title: "只測試六位數",
-                    subcase: [
-                        {
-                            case_title: "情況一",
-                            input: "100000 999999",
-                            output: "900",
-                            score: "5"
-                        },
-                        {
-                            case_title: "情況二",
-                            input: "123456 567890",
-                            output: "444",
-                            score: "5"
-                        },
-                        {
-                            case_title: "情況三",
-                            input: "797979 979797",
-                            output: "181",
-                            score: "5"
-                        },
-                        {
-                            case_title: "情況四",
-                            input: "111111 111111",
-                            output: "1",
-                            score: "5"
+                            case_title: "C10",
+                            input: "11 1 9 8 7 6 5 4 3 2 1 9 9 1 2 3 4 5 6 7 8 9",
+                            output: "1 1 2 3 4 5 6 7 8 9 9",
+                            score: "6"
                         }
                     ]
                 }
             ]
         },
         2: {
-            title: "活動分組",
+            title: "短片欣賞",
             statements: [
                 {
-                    text: "栗栗國中社團迎新共有 15 個活動（編號 1 至 15 ），依序輸入每位新生報名參加的活動，最後輸入 -1 代表輸入完畢。\n\n請列出尚未有新生報名的活動有哪些。若所有活動皆有新生報名，則顯示「無」。"
+                    text: "圖書館有一間媒體播放室，每週六會連續播放科學系列短片(最多 20 個短片)。短片代碼為大寫英文字母，例如 A, X, P 等，但同一系列短片會用相同的英文字母表示。娜娜有特別喜歡看的系列短片，但每天能夠進圖書館看短片的時間有限。\n\n舉例來說，圖書館安排連續播放以下 8 場次的短片，娜娜最喜歡 A 系列短片，且該天有時間可以連續看 5 場次。她若從第 1 場次開始看，只會看到 2 個 A 系列短片；但若是從第 4 場次開始看，就能夠看到 3 個 A 系列短片。"
+                },
+                {
+                    table: "\n場次, 短片代碼,\n1,A,\n2,B,\n3,C,\n4,A,\n5,W,\n6,A,\n7,Q,\n8,A"
+                },
+                {
+                    text: "請幫娜娜計算最多可以看到幾次最喜歡的系列短片。"
                 }
+
             ],
             example_cases: [
                 {
                     title: "範例一",
-                    input: "1 4 2 6 10 11 5 15 12 13 14 8 -1",
-                    output: "3 7 9",
-                    description: "新生們依序報名了編號為 1、4、2、6、10、11 、5、15、12、13、14、8 的活動 (-1表示結束)。因此編號 3、7、9 的活動未有新生報名。"
+                    input: "8 A B C A W A Q A 5 A",
+                    output: "3",
+                    description: "圖書館安排連續播放8場次的短片，\n依序播放系列短片A B C A W A Q A。\n娜娜有時間可以連續看5場次，且最喜歡的是A系列短片。\n\n最佳情形是從第4場開始看 (A W A Q A)，共可以看到3場次的A系列短片，因此輸出 3。"
                 },
                 {
                     title: "範例二",
-                    input: "7 3 9 12 1 15 6 10 4 14 9 2 9 13 8 5 11 -1",
-                    output: "無",
-                    description: "新生們依序報名了編號為 7、3、9、12、1、15、6、10、4、14、9、2、9、13、8、5、11 的活動 (-1表示結束)。因此所有活動皆有新生報名。"
+                    input: "3 X G X 2 X",
+                    output: "1",
+                    description: "圖書館安排連續播放3場次的短片。\n3場次依序播放短片 X G X。\n娜娜有時間可以連續看2場次，且最喜歡的是X系列短片。\n\n最佳情形是從第 1 場或第 2 場開始看(X G), (G X)都可以看到 1 場，因此輸出 1。"
                 }
             ],
-            "cases": [
+            cases: [
+
                 {
-                    "group_title": "所有活動都沒有新生報名",
-                    "subcase": [
+                    group_title: "有時間看所有短片",
+                    subcase: [
                         {
-                            "case_title": "情況一",
-                            "input": "0 -1",
-                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
-                            "score": "5"
+                            case_title: "A1",
+                            input: "3 A A B 3 A",
+                            output: "2",
+                            score: "6"
                         },
                         {
-                            "case_title": "情況二",
-                            "input": "-1",
-                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
-                            "score": "5"
+                            case_title: "A2",
+                            input: "3 C B C 3 D",
+                            output: "0",
+                            score: "6"
                         },
                         {
-                            "case_title": "情況三",
-                            "input": "16 -1",
-                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
-                            "score": "5"
+                            case_title: "A3",
+                            input: "4 B A A C 4 C",
+                            output: "1",
+                            score: "6"
                         },
                         {
-                            "case_title": "情況四",
-                            "input": "10000 -1",
-                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
-                            "score": "5"
+                            case_title: "A4",
+                            input: "6 C B A A B C 6 B",
+                            output: "2",
+                            score: "6"
                         },
                         {
-                            "case_title": "情況五",
-                            "input": "0 0 0 0 0 -1",
-                            "output": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15",
-                            "score": "5"
+                            case_title: "A5",
+                            input: "12 A B A B B F A F A F B A 12 B",
+                            output: "4",
+                            score: "6"
                         }
                     ]
                 },
                 {
-                    "group_title": "部分活動有新生報名",
-                    "subcase": [
+                    group_title: "僅有時間看部分連續短片",
+                    subcase: [
                         {
-                            "case_title": "情況一",
-                            "input": "13 1 4 2 6 1 8 2 3 2 14 -1",
-                            "output": "5 7 9 10 11 12 15",
-                            "score": "5"
+                            case_title: "B1",
+                            input: "6 E A B C D A 1 A",
+                            output: "1",
+                            score: "5"
                         },
                         {
-                            "case_title": "情況二",
-                            "input": "2 8 2 3 3 8 4 5 15 15 7 7 13 5 11 8 6 4 12 9 6 -1",
-                            "output": "1 10 14",
-                            "score": "5"
+                            case_title: "B2",
+                            input: "7 A B A C E F D 4 A",
+                            output: "2",
+                            score: "5"
                         },
                         {
-                            "case_title": "情況三",
-                            "input": "5 10 9 1 1 10 8 15 10 9 4 15 1 15 10 11 9 5 3 9 -1",
-                            "output": "2 6 7 12 13 14",
-                            "score": "5"
+                            case_title: "B3",
+                            input: "8 B C F P F G F F 4 F",
+                            output: "3",
+                            score: "5"
                         },
                         {
-                            "case_title": "情況四",
-                            "input": "10 8 2 3 3 3 14 13 4 12 -1",
-                            "output": "1 5 6 7 9 11 15",
-                            "score": "5"
+                            case_title: "B4",
+                            input: "14 D C C C B A C D C C C C C D 7 C",
+                            output: "6",
+                            score: "5"
                         },
                         {
-                            "case_title": "情況五",
-                            "input": "8 6 4 13 10 8 12 8 9 5 2 1 2 8 9 12 8 14 2 6 -1",
-                            "output": "3 7 11 15",
-                            "score": "5"
+                            case_title: "B5",
+                            input: "15 A Z A C Z Z D Z Z B Z Z Z Z C 6 Z",
+                            output: "5",
+                            score: "5"
                         },
                         {
-                            "case_title": "情況六",
-                            "input": "3 13 5 7 13 9 13 14 9 11 7 3 9 10 9 3 3 10 14 6 15 10 13 2 9 12 8 -1",
-                            "output": "1 4",
-                            "score": "5"
+                            case_title: "B6",
+                            input: "20 A A A A A A A B B B B A B B C B B B B B 15 B",
+                            output: "11",
+                            score: "5"
                         },
                         {
-                            "case_title": "情況七",
-                            "input": "15 1 15 12 5 9 9 11 3 12 7 2 4 15 -1",
-                            "output": "6 8 10 13 14",
-                            "score": "5"
+                            case_title: "B7",
+                            input: "20 Z Y X W V U T S R Q P O N M L K J I H G 5 C",
+                            output: "0",
+                            score: "5"
                         },
                         {
-                            "case_title": "情況八",
-                            "input": "1 1 1 1 -1",
-                            "output": "2 3 4 5 6 7 8 9 10 11 12 13 14 15",
-                            "score": "5"
-                        },
-                        {
-                            "case_title": "情況九",
-                            "input": "15 1 15 12 5 16 9 9 11 3 12 7 0 4 15 -1",
-                            "output": "2 6 8 10 13 14",
-                            "score": "5"
-                        },
-                        {
-                            "case_title": "情況十",
-                            "input": "1 4 2 6 10 11 5 15 12 13 14 8 -1",
-                            "output": "3 7 9",
-                            "score": "5"
+                            case_title: "B8",
+                            input: "20 Z Y X X V U T S P P P P P M L K K J H G 5 K",
+                            output: "2",
+                            score: "5"
                         }
                     ]
                 },
                 {
-                    "group_title": "所有活動都有新生報名",
-                    "subcase": [
+                    group_title: "特殊情形",
+                    subcase: [
                         {
-                            "case_title": "情況一",
-                            "input": "14 14 12 15 15 11 1 1 13 7 5 9 6 11 1 3 15 13 14 2 13 6 13 4 6 2 10 6 8 -1",
-                            "output": "無",
-                            "score": "5"
+                            case_title: "C1",
+                            input: "3 B B B 2 B",
+                            output: "2",
+                            score: "6"
                         },
                         {
-                            "case_title": "情況二",
-                            "input": "1 3 5 7 9 8 4 6 2 10 15 13 12 14 11 -1",
-                            "output": "無",
-                            "score": "5"
+                            case_title: "C2",
+                            input: "3 B B B 3 B",
+                            output: "3",
+                            score: "6"
                         },
                         {
-                            "case_title": "情況三",
-                            "input": "1 1 7 6 15 12 9 3 1 5 4 1 14 4 13 2 10 6 11 7 9 7 4 15 9 8 11 4 -1",
-                            "output": "無",
-                            "score": "5"
+                            case_title: "C3",
+                            input: "15 A A A A A A A A A A A A A A A 12 A",
+                            output: "12",
+                            score: "6"
                         },
                         {
-                            "case_title": "情況四",
-                            "input": "1000 99 123 1 1 7 6 15 12 9 3 1 5 4 1 14 4 13 2 10 6 11 7 9 7 4 15 9 8 11 4 -1",
-                            "output": "無",
-                            "score": "5"
+                            case_title: "C4",
+                            input: "12 A A A A A A A A A A A A 6 B",
+                            output: "0",
+                            score: "6"
                         },
                         {
-                            "case_title": "情況五",
-                            "input": "1000 99 123 1 1 7 6 15 12 9 3 1 5 4 1 14 4 13 2 10 6 11 7 9 7 4 15 9 8 11 4 -1",
-                            "output": "無",
-                            "score": "5"
+                            case_title: "C5",
+                            input: "15 A B C X X X A A A X X X A A X 6 X",
+                            output: "4",
+                            score: "6"
                         }
                     ]
                 }
@@ -1195,7 +1518,7 @@ function Question({ id }: { id: number }) {
                 value: 'tab2',
                 // title: '任務演練',                                
                 title: '自行測試',
-                content: <CodeDrillTab questionData={questionData} qid={id}/>,
+                content: <CodeDrillTab questionData={questionData} qid={id} />,
             },
             {
                 value: 'tab3',
