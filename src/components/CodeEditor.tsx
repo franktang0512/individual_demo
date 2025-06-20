@@ -20,6 +20,7 @@ import {
   initialScratchWorkspace,
   variableFlyoutCallback,
   listFlyoutCallback,
+  list2DFlyoutCallback,
   functionFlyoutCallback,
 } from "@/lib/blockly-workspace/scratch";
 import { initiateBlocklyWorkspace } from "@/lib/blockly-workspace/init";
@@ -239,16 +240,51 @@ export function CodeEditor() {
           listFlyoutCallback,
         );
         workspace.registerButtonCallback("CREATE_SCRATCH_LIST", () => {
-          const originalNewVariableTitleMsg = Blockly.Msg.NEW_VARIABLE_TITLE;
+          // const promptText = "新清單名稱"; // 修改這裡為你想要的提示文字
+          // const listName = window.prompt(promptText); // 顯示 prompt 並取得使用者輸入
+
+          // if (listName) {
+          //   // 如果有輸入名稱，就創建一個新的清單變數
+          //   Blockly.Variables.createVariableButtonHandler(workspace, undefined, "list");
+          // }
+		 const originalNewVariableTitleMsg = Blockly.Msg.NEW_VARIABLE_TITLE;
 				  Blockly.Msg.NEW_VARIABLE_TITLE = "新清單名稱：";
+				  
           Blockly.Variables.createVariableButtonHandler(
             workspace,
-            () => {
+			() => {
               Blockly.Msg.NEW_VARIABLE_TITLE = originalNewVariableTitleMsg;
             },
             "list",
           );
         });
+		
+		workspace.registerToolboxCategoryCallback(
+          "SCRATCH_LIST2D",
+          list2DFlyoutCallback,
+        );
+		
+		workspace.registerButtonCallback("CREATE_SCRATCH_LIST2D", () => {
+          // const promptText = "新清單名稱"; // 修改這裡為你想要的提示文字
+          // const listName = window.prompt(promptText); // 顯示 prompt 並取得使用者輸入
+
+          // if (listName) {
+          //   // 如果有輸入名稱，就創建一個新的清單變數
+          //   Blockly.Variables.createVariableButtonHandler(workspace, undefined, "list");
+          // }
+		 const originalNewVariableTitleMsg = Blockly.Msg.NEW_VARIABLE_TITLE;
+				  Blockly.Msg.NEW_VARIABLE_TITLE = "新二維清單名稱：";
+				  
+          Blockly.Variables.createVariableButtonHandler(
+            workspace,
+			() => {
+              Blockly.Msg.NEW_VARIABLE_TITLE = originalNewVariableTitleMsg;
+            },
+            "list2d",
+          );
+        });
+		
+		
         workspace.registerToolboxCategoryCallback(
           "SCRATCH_FUNCTION",
           functionFlyoutCallback,
@@ -267,6 +303,8 @@ const handleWorkspaceDispose = useCallback(
       workspace.removeButtonCallback("CREATE_SCRATCH_VARIABLE");
       workspace.removeToolboxCategoryCallback("SCRATCH_LIST");
       workspace.removeButtonCallback("CREATE_SCRATCH_LIST");
+	  workspace.removeToolboxCategoryCallback("SCRATCH_LIST2D");
+      workspace.removeButtonCallback("CREATE_SCRATCH_LIST2D");
       workspace.removeToolboxCategoryCallback("SCRATCH_FUNCTION");
       workspace.removeButtonCallback("CREATE_SCRATCH_FUNCTION");
     },

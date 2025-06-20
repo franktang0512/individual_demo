@@ -139,7 +139,69 @@ export function listFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
   return xmlList;
 }
 
+function createList2DField(listVar: Blockly.VariableModel) {
+  const field = document.createElement("field");
+  field.setAttribute("name", "LIST");
+  field.setAttribute("id", listVar.getId());
+  field.setAttribute("variabletype", "list2d");
+  const name = document.createTextNode(listVar.name);
+  field.appendChild(name);
+  return field;
+}
 
+export function list2DFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
+  const xmlList = [];
+
+  // 建立新清單按鈕
+  const button = document.createElement("button");
+  button.setAttribute("text", "建立新二維清單");
+  button.setAttribute("callbackKey", "CREATE_SCRATCH_LIST2D");
+  xmlList.push(button);
+
+  // 取得目前的清單變數
+  const lists = workspace.getVariablesOfType("list2d");
+  const lastList = lists[lists.length - 1]; // 取得最後宣告的清單
+  if (lists.length > 0) {
+    const pattern = /^[\u4e00-\u9fa5a-zA-Z0-9]+$/; // 不允許底線
+    if (!pattern.test(lastList.name)) {
+
+      workspace.deleteVariableById(lastList.getId()); // 刪除不符合命名規範的清單變數      
+      lists.splice(lists.length - 1, 1);
+      // alert(`清單名稱 "${list.name}" 不符合規範，已被刪除！`);
+      alert(`請只使用中英文宣告清單名稱！`);
+      // 直接跳過這個變數，繼續處理下個變數
+    } else {
+      for (const list of lists) {
+        //檢查每個清單名稱是否符合規範
+        // **為所有清單產生「取得清單值」積木**
+        const getBlock = document.createElement("block");
+        getBlock.setAttribute("type", "scratch_list2d_get");
+        getBlock.appendChild(createList2DField(list));
+        xmlList.push(getBlock);
+      }
+
+      // **只為「最後宣告的清單」生成其他積木**
+      [
+		"scratch_list2d_setsize",
+        //"scratch_list2d_add",
+        "scratch_list2d_get_item",
+        //"scratch_list2d_empty",
+        //"scratch_list2d_length",
+        //"scratch_list2d_insert",
+        "scratch_list2d_set",
+        //"scratch_list2d_remove",
+        //"scratch_list2d_contain",
+        //"scratch_list2d_indexof",
+      ].forEach((type) => {
+        const block = document.createElement("block");
+        block.setAttribute("type", type);
+        block.appendChild(createList2DField(lastList));
+        xmlList.push(block);
+      });
+    }
+  }
+  return xmlList;
+}
 
 export function functionFlyoutCallback(workspace: Blockly.WorkspaceSvg) {
   const xmlList = [];
@@ -270,12 +332,28 @@ export function initializeScratch() {
   javascriptGenerator.forBlock["event_askandwait"] = function (block) {
     var value_question = javascriptGenerator.valueToCode(block, 'TEXT', Order.ATOMIC) || "''";
 
+    // var code = `
+    // system_input = window.prompt(${value_question}) ?? "";\n  
+    // system_input = system_input.toString().trim();\n
+    // if (!isNaN(system_input) && system_input !== "") {\n
+    //     system_input = Number(system_input);\n
+    // }\n
+    // `;
     var code = `
-    system_input = window.prompt(${value_question}) ?? "";\n  
-    system_input = system_input.toString().trim();\n
-    if (!isNaN(system_input) && system_input !== "") {\n
-        system_input = Number(system_input);\n
-    }\n
+    system_input = window.prompt(${value_question}) ?? "";\n
+    system_input = system_input.toString();\n
+    temp_input = system_input.toString().trim();
+    if(temp_input === ""){
+      if(system_input === " "){
+        system_input = " "; 
+      }else{
+        system_input = "";
+      }
+    }else if (!isNaN(temp_input)) {  // 如果是數字字串，轉換為數字
+        system_input = Number(temp_input);
+    }else{
+        system_input = temp_input;
+    }
     `;
     return code;
   };
@@ -776,7 +854,7 @@ export function initializeScratch() {
   //   },
   // };
 
-  
+
   Blockly.Blocks["scratch_variables_set"] = {
     init: function () {
       this.appendDummyInput()
@@ -947,27 +1025,41 @@ export function initializeScratch() {
     },
   };
   // Add JavaScript generators
+  // javascriptGenerator.forBlock["scratch_list_get"] = function (block) {
+  //   // var field = block.getField("LIST");
+  //   // if (!field) {
+  //   //   console.warn("Field 'LIST' not found on block:", block);
+  //   //   return ["[]", Order.ATOMIC]; // 預設回傳空陣列，避免錯誤
+  //   // }
+
+  //   // var listName = javascriptGenerator.nameDB_!.getName(
+  //   //   field.getText(),
+  //   //   Blockly.Names.NameType.VARIABLE
+  //   // );
+
+  //   // // ✅ 確保變數已經被宣告過
+  //   // var code = `${listName} = ${listName} || [];\n`;
+  //   // return [`${code} ${listName}`, Order.ATOMIC];
+
+
+  //   var field = block.getField("LIST");
+  //   if (!field) {
+  //     console.warn("Field 'LIST' not found on block:", block);
+  //     return ["[]", Order.ATOMIC]; // 預設回傳空陣列，避免錯誤
+  //   }
+
+  //   var listName = javascriptGenerator.nameDB_!.getName(
+  //     field.getText(),
+  //     Blockly.Names.NameType.VARIABLE
+  //   );
+
+  //   return [`(${listName} = ${listName} || [], ${listName})`, Order.ATOMIC];
+  // };
   javascriptGenerator.forBlock["scratch_list_get"] = function (block) {
-    // var field = block.getField("LIST");
-    // if (!field) {
-    //   console.warn("Field 'LIST' not found on block:", block);
-    //   return ["[]", Order.ATOMIC]; // 預設回傳空陣列，避免錯誤
-    // }
-
-    // var listName = javascriptGenerator.nameDB_!.getName(
-    //   field.getText(),
-    //   Blockly.Names.NameType.VARIABLE
-    // );
-
-    // // ✅ 確保變數已經被宣告過
-    // var code = `${listName} = ${listName} || [];\n`;
-    // return [`${code} ${listName}`, Order.ATOMIC];
-
-
     var field = block.getField("LIST");
     if (!field) {
       console.warn("Field 'LIST' not found on block:", block);
-      return ["[]", Order.ATOMIC]; // 預設回傳空陣列，避免錯誤
+      return ["''", Order.ATOMIC]; // 預設回傳空字串，避免錯誤
     }
 
     var listName = javascriptGenerator.nameDB_!.getName(
@@ -975,9 +1067,9 @@ export function initializeScratch() {
       Blockly.Names.NameType.VARIABLE
     );
 
-    return [`(${listName} = ${listName} || [], ${listName})`, Order.ATOMIC];
+    // 確保 listName 是有效的陣列
+    return [`(${listName} = ${listName} || [], ${listName}.map(String).join(''))`, Order.ATOMIC];
   };
-
 
   // Add item to list
   Blockly.Blocks["scratch_list_add"] = {
@@ -1515,9 +1607,209 @@ export function initializeScratch() {
       Order.ATOMIC
     ];
   };
+  
+  
+  
+  // 二維清單積木設計
+  
+  Blockly.Blocks["scratch_list2d_setsize"] = {
 
+    init: function () {
+      this.appendDummyInput()
+        .appendField("設定")
+        .appendField(
+          new Blockly.FieldVariable("", undefined, ["list2d"], "list2d"),
+          "LIST"
+        );
 
+      let indexInput = this.appendValueInput("INDEX").setCheck("Number").appendField("的列大小為");
 
+      // ✅ 設定 `INDEX` 的白色橢圓 Shadow Block（數字輸入框）
+      let indexShadow = document.createElement("shadow");
+      indexShadow.setAttribute("type", "math_number");
+      let indexField = document.createElement("field");
+      indexField.setAttribute("name", "NUM");
+      indexField.textContent = "1"; // 預設值
+      indexShadow.appendChild(indexField);
+      indexInput.connection.setShadowDom(indexShadow); // ✅ 讓 `INDEX` 變成 Scratch 樣式
+
+      let itemInput = this.appendValueInput("ITEM").setCheck(null).appendField(",欄大小為");
+
+      // ✅ 設定 `ITEM` 的白色橢圓 Shadow Block（文字輸入框）
+      let itemShadow = document.createElement("shadow");
+      itemShadow.setAttribute("type", "scratch_text");
+      let itemField = document.createElement("field");
+      itemField.setAttribute("name", "TEXT");
+      itemField.textContent = "1"; // 預設值
+      itemShadow.appendChild(itemField);
+      itemInput.connection.setShadowDom(itemShadow); // ✅ 讓 `ITEM` 變成 Scratch 樣式
+	  
+	  
+	  let inititemInput = this.appendValueInput("INIT").setCheck(null).appendField(",元素初始為");
+	  
+	  let inititemShadow = document.createElement("shadow");
+	  inititemShadow.setAttribute("type", "scratch_text");
+	  let inititemField = document.createElement("field");
+	  inititemField.setAttribute("name", "TEXT");
+	  inititemField.textContent = "0";
+	  inititemShadow.appendChild(inititemField); // ✅ 修正這行
+	  inititemInput.connection.setShadowDom(inititemShadow);
+	  
+
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setStyle("list_blocks");
+      this.setTooltip("修改指定位置的項目");
+    },
+  
+  };
+javascriptGenerator.forBlock["scratch_list2d_setsize"] = function (block) {
+  const listName = javascriptGenerator.nameDB_.getName(
+    block.getFieldValue("LIST"),
+    Blockly.Names.NameType.VARIABLE
+  );
+  const rows = javascriptGenerator.valueToCode(block, "INDEX", Order.ATOMIC) || "1";
+  const cols = javascriptGenerator.valueToCode(block, "ITEM", Order.ATOMIC) || "1";
+  const init = javascriptGenerator.valueToCode(block, "INIT", Order.ATOMIC) || "0";
+
+  return `${listName} = Array.from({ length: ${rows} }, () => Array.from({ length: ${cols} }, () => ${init}));\n`;
+};
+  
+  Blockly.Blocks["scratch_list2d_get"] = {
+    init: function () {
+      this.appendDummyInput().appendField(
+        new Blockly.FieldVariable("", undefined, ["list2d"], "list2d"),
+        "LIST"
+      );
+      this.setOutput(true, null);
+      this.setStyle("list_blocks");
+      this.setTooltip("取得清單");
+    },
+  };
+javascriptGenerator.forBlock["scratch_list2d_get"] = function (block) {
+  const listName = javascriptGenerator.nameDB_.getName(
+    block.getFieldValue("LIST"),
+    Blockly.Names.NameType.VARIABLE
+  );
+  return [listName, Order.ATOMIC];
+};
+
+  // Add item to list
+  // Get item at index
+Blockly.Blocks["scratch_list2d_get_item"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField(
+        new Blockly.FieldVariable("", undefined, ["list2d"], "list2d"),
+        "LIST"
+      );
+
+    // 第 [row]
+    let rowInput = this.appendValueInput("ROW").setCheck("Number").appendField("第");
+    let rowShadow = document.createElement("shadow");
+    rowShadow.setAttribute("type", "math_number");
+    let rowField = document.createElement("field");
+    rowField.setAttribute("name", "NUM");
+    rowField.textContent = "1";
+    rowShadow.appendChild(rowField);
+    rowInput.connection.setShadowDom(rowShadow);
+
+    // [col]
+    let colInput = this.appendValueInput("COL").setCheck("Number").appendField("列,第");
+    let colShadow = document.createElement("shadow");
+    colShadow.setAttribute("type", "math_number");
+    let colField = document.createElement("field");
+    colField.setAttribute("name", "NUM");
+    colField.textContent = "1";
+    colShadow.appendChild(colField);
+    colInput.connection.setShadowDom(colShadow);
+
+    // 項（結尾詞）
+    this.appendDummyInput().appendField("欄項");
+
+    this.setInputsInline(true);
+    this.setOutput(true, null);
+    this.setStyle("list_blocks");
+    this.setTooltip("取得 2D 清單中指定位置的項目");
+  },
+};
+javascriptGenerator.forBlock["scratch_list2d_get_item"] = function (block) {
+  const listName = javascriptGenerator.nameDB_.getName(
+    block.getFieldValue("LIST"),
+    Blockly.Names.NameType.VARIABLE
+  );
+  const row = javascriptGenerator.valueToCode(block, "ROW", Order.ATOMIC) || "1";
+  const col = javascriptGenerator.valueToCode(block, "COL", Order.ATOMIC) || "1";
+
+  return [`${listName}[${row} - 1][${col} - 1]`, Order.MEMBER];
+};
+
+Blockly.Blocks["scratch_list2d_set"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("替換")
+      .appendField(
+        new Blockly.FieldVariable("", undefined, ["list2d"], "list2d"),
+        "LIST"
+      );
+
+    // 第 [row]
+    let rowInput = this.appendValueInput("ROW").setCheck("Number").appendField("第");
+    let rowShadow = document.createElement("shadow");
+    rowShadow.setAttribute("type", "math_number");
+    let rowField = document.createElement("field");
+    rowField.setAttribute("name", "NUM");
+    rowField.textContent = "1";
+    rowShadow.appendChild(rowField);
+    rowInput.connection.setShadowDom(rowShadow);
+
+    // [col]
+    let colInput = this.appendValueInput("COL").setCheck("Number").appendField("列,第");
+    let colShadow = document.createElement("shadow");
+    colShadow.setAttribute("type", "math_number");
+    let colField = document.createElement("field");
+    colField.setAttribute("name", "NUM");
+    colField.textContent = "1";
+    colShadow.appendChild(colField);
+    colInput.connection.setShadowDom(colShadow);
+
+    // 項為 [value]
+    let itemInput = this.appendValueInput("ITEM").setCheck(null).appendField("欄項為");
+    let itemShadow = document.createElement("shadow");
+    itemShadow.setAttribute("type", "scratch_text");
+    let itemField = document.createElement("field");
+    itemField.setAttribute("name", "TEXT");
+    itemField.textContent = "新值";
+    itemShadow.appendChild(itemField);
+    itemInput.connection.setShadowDom(itemShadow);
+
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setStyle("list_blocks");
+    this.setTooltip("修改 2D 清單中指定位置的項目");
+  },
+};
+
+javascriptGenerator.forBlock["scratch_list2d_set"] = function (block) {
+  const field = block.getField("LIST");
+  if (!field) {
+    console.warn("Field 'LIST' not found on block:", block);
+    return "";
+  }
+
+  const listName = javascriptGenerator.nameDB_.getName(
+    field.getText(),
+    Blockly.Names.NameType.VARIABLE
+  );
+
+  const row = javascriptGenerator.valueToCode(block, "ROW", Order.ATOMIC) || "1";
+  const col = javascriptGenerator.valueToCode(block, "COL", Order.ATOMIC) || "1";
+  const value = javascriptGenerator.valueToCode(block, "ITEM", Order.NONE) || "0";
+
+  return `${listName}[${row} - 1][${col} - 1] = ${value};\n`;
+};
 
 
 
@@ -1759,12 +2051,50 @@ export function initializeScratch() {
       this.setStyle("calculation_blocks");
     },
   };
+  // javascriptGenerator.forBlock["scratch_logic_compare"] = function (block) {
+  //   const operator = block.getFieldValue("OP");
+  //   const order = Order.RELATIONAL;
+  //   let A = javascriptGenerator.valueToCode(block, "A", order) || "0";
+  //   let B = javascriptGenerator.valueToCode(block, "B", order) || "0";
+
+  //   const operators: { [key: string]: string } = {
+  //     EQ: "===",
+  //     NEQ: "!==",
+  //     LT: "<",
+  //     GT: ">",
+  //     LTE: "<=",
+  //     GTE: ">=",
+  //   };
+
+  //   const isLiteralString = (v: string): boolean =>
+  //     typeof v === "string" && (v.startsWith('"') || v.startsWith("'"));
+
+  //   // 決定比較方式：
+  //   let code = "";
+
+  //   if (!isLiteralString(A) && !isLiteralString(B)) {
+  //     // 都不是字串字面值，進行數值比較
+  //     A = `Number(${A})`;
+  //     B = `Number(${B})`;
+  //     code = `${A} ${operators[operator]} ${B}`;
+  //   } else {
+  //     // 任一是字串，則都轉成字串比較
+  //     A = `String(${A})`;
+  //     B = `String(${B})`;
+  //     code = `${A} ${operators[operator]=="==="?"==":operators[operator]} ${B}`;
+  //   }
+
+
+  //   return [code, order];
+  // };
   javascriptGenerator.forBlock["scratch_logic_compare"] = function (block) {
     const operator = block.getFieldValue("OP");
     const order = Order.RELATIONAL;
+
+    // 取得 A 和 B 的值
     let A = javascriptGenerator.valueToCode(block, "A", order) || "0";
     let B = javascriptGenerator.valueToCode(block, "B", order) || "0";
-  
+
     const operators: { [key: string]: string } = {
       EQ: "===",
       NEQ: "!==",
@@ -1773,27 +2103,44 @@ export function initializeScratch() {
       LTE: "<=",
       GTE: ">=",
     };
-  
-    const isLiteralString = (v: string): boolean =>
-      typeof v === "string" && (v.startsWith('"') || v.startsWith("'"));
-  
-    // 決定比較方式：
+
+    // 檢查是否能轉換為數字
+    //const isNumeric = (value: string): boolean => !isNaN(parseFloat(value));
+
+    // 判斷 A 和 B 是否可以被轉換為數字
+    //const isANumeric = isNumeric(A);
+    //const isBNumeric = isNumeric(B);
+
     let code = "";
-  
-    if (!isLiteralString(A) && !isLiteralString(B)) {
-      // 都不是字串字面值，進行數值比較
-      A = `Number(${A})`;
-      B = `Number(${B})`;
-    } else {
-      // 任一是字串，則都轉成字串比較
-      A = `String(${A})`;
-      B = `String(${B})`;
-    }
-  
-    code = `${A} ${operators[operator]} ${B}`;
+
+    code += `(Number.isNaN(Number(${A})) || Number.isNaN(Number(${B}))?String(${A}) ${operators[operator]} String(${B}):Number(${A}) ${operators[operator]} Number(${B}))`;
+	
+    //code += `(Number.isNaN(Number(${A}))? String(${A}):Number(${A})) ${operators[operator]} (!Number(${B})? String(${B}):Number(${B}))`;
+	//code = `Number(${A}) ${operators[operator]} Number(${B})`;
+	
+	//code = `${A} ${operators[operator]} ${B}`;
+	
+    //code += `}catch(e){`;
+	
+	//AA = `String(${A})`;
+    //BB = `String(${B})`;
+    //code += `String(${A}) ${operators[operator] === "===" ? "===" : operators[operator]} String(${B})`;
+    //if (isANumeric && isBNumeric) {
+    //  A = `Number(A)`;
+    //  B = `Number(B)`;
+    //  code = `${A} ${operators[operator]} ${B}`;
+    //} else {
+    //  // 否則，進行字串比較
+    //  A = `String(${A})`;
+    //  B = `String(${B})`;
+    //  code = `${A} ${operators[operator] === "===" ? "===" : operators[operator]} ${B}`;
+    //}
+	// console.log(code);
+	// console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     return [code, order];
   };
-  
+
+
   // javascriptGenerator.forBlock["scratch_logic_compare"] = function (block) {
   //   const operator = block.getFieldValue("OP");
   //   const order = Order.RELATIONAL;
@@ -2629,6 +2976,62 @@ export const scratchToolboxConfig = {
           kind: "block",
           type: "lists_reverse",
         },
+      ],
+    },   
+	{
+      kind: "category",
+      name: "二維清單",
+      custom: "SCRATCH_LIST2D",
+      categorystyle: "list_category",
+      contents: [
+        //{
+        //  kind: "block",
+        //  type: "lists2d_create_empty",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_create_with",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_repeat",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_length",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_isEmpty",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_indexOf",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_getIndex",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_setIndex",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_getSublist",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_sort",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_split",
+        //},
+        //{
+        //  kind: "block",
+        //  type: "lists2d_reverse",
+        //},
       ],
     },
     {
