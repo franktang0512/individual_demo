@@ -76,36 +76,40 @@ function ExampleContent({
     output,
     description,
     isVisible,
-}: ExampleContentProps) {
+  }: ExampleContentProps) {
     return (
-        <div
-            className={`relative w-[100%] max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${isVisible ? 'opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}
-        >
-            <div className="flex justify-between mt-4 p-2 text-white rounded-md border-b">
-                <div className="w-1/2 border-r border-gray-300 text-center">
-                    <p className="font-bold">輸入</p>
-                    {/* <p className="mt-1 text-lg text-left ml-2">{input}</p> */}
-                    <p className="mt-1 text-lg ml-2">
-                        {input.split('\n').map((line, idx) => (
-                            <div key={idx}>{line}</div>
-                        ))}</p>
-                </div>
-                <div className="w-1/2 text-center">
-                    <p className="font-bold">輸出</p>
-                    <p className="mt-1 text-lg ml-2">
-                        {output.split('\n').map((line, idx) => (
-                            <div key={idx}>{line}</div>
-                        ))}</p>
-                </div>
+      <div
+        className={`relative w-[100%] max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${
+          isVisible ? 'opacity-100 py-4' : 'max-h-0 opacity-0 py-0'
+        }`}
+      >
+        <div className="flex justify-between mt-4 p-2 text-white rounded-md border-b">
+          <div className="w-1/2 border-r border-gray-300 pr-2">
+            <p className="font-bold text-center">輸入</p>
+            <div className="mt-1 text-lg ml-2 whitespace-pre-wrap break-words">
+              {input.split('\n').map((line, idx) => (
+                <div key={idx} className="text-left">{line}</div>
+              ))}
             </div>
-            <p className="mt-4 text-lg text-left">
-                {description.split('\n').map((line, idx) => (
-                    <div key={idx}>{line}</div>
-                ))}</p>
+          </div>
+          <div className="w-1/2 pl-2">
+            <p className="font-bold text-center">輸出</p>
+            <div className="mt-1 text-lg ml-2 whitespace-pre-wrap break-words">
+              {output.split('\n').map((line, idx) => (
+                <div key={idx} className="text-left">{line}</div>
+              ))}
+            </div>
+          </div>
         </div>
-    );
-}
-
+        <p className="mt-4 text-lg text-left whitespace-pre-wrap break-words">
+          {description.split('\n').map((line, idx) => (
+            <div key={idx}>{line}</div>
+          ))}
+        </p>
+      </div>
+    )
+  }
+  
 
 
 // function IntroTab({ questionData }: { questionData: any }) {
