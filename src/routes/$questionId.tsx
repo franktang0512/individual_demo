@@ -44,7 +44,7 @@ function TabComponentWrapper({ title, children }: { title: string; children: Rea
     );
 }
 
-// 點範例按鈕後可以看到的內容
+// 點範例按鈕後可以看到的內容// 點範例按鈕後可以看到的內容
 interface ExampleButtonProps {
     text: string
     onClick: () => void
@@ -79,27 +79,95 @@ function ExampleContent({
 }: ExampleContentProps) {
     return (
         <div
-            className={`relative w-[90%] max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${isVisible ? 'max-h-[500px] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}
+            className={`relative w-[100%] max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${isVisible ? 'opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}
         >
             <div className="flex justify-between mt-4 p-2 text-white rounded-md border-b">
                 <div className="w-1/2 border-r border-gray-300 text-center">
                     <p className="font-bold">輸入</p>
                     {/* <p className="mt-1 text-lg text-left ml-2">{input}</p> */}
-                    <p className="mt-1 text-lg ml-2">{input}</p>
+                    <p className="mt-1 text-lg ml-2">
+                        {input.split('\n').map((line, idx) => (
+                            <div key={idx}>{line}</div>
+                        ))}</p>
                 </div>
                 <div className="w-1/2 text-center">
                     <p className="font-bold">輸出</p>
-                    <p className="mt-1 text-lg ml-2">{output}</p>
+                    <p className="mt-1 text-lg ml-2">
+                        {output.split('\n').map((line, idx) => (
+                            <div key={idx}>{line}</div>
+                        ))}</p>
                 </div>
             </div>
-            <p className="mt-4 text-lg text-left">{description}</p>
+            <p className="mt-4 text-lg text-left">
+                {description.split('\n').map((line, idx) => (
+                    <div key={idx}>{line}</div>
+                ))}</p>
         </div>
     );
 }
 
 
 
+// function IntroTab({ questionData }: { questionData: any }) {
+//     const [activeExample, setActiveExample] = useState<string | null>(null);
+//     const [data, setData] = useState<any | null>(null);
+
+//     useEffect(() => {
+//         if (questionData) {
+//             setData(questionData);
+//         }
+//     }, [questionData]); // 監聽 `questionData` 變更，確保 `data` 正確更新
+
+//     if (!data) return <p>載入中...</p>;
+
+//     return (
+//         <TabComponentWrapper title={data.title}>
+//             <div className="w-full max-w-lg max-h-full overflow-y-auto rounded-lg p-2">
+//                 {/* 顯示題目敘述 */}
+//                 <div className="w-full px-4 text-xl">
+//                     {data.statements.map((statement: any, index: number) => (
+//                         <div key={index} className="mb-4">
+//                             {statement.text && (
+//                                 <p className="mb-2">
+//                                     {statement.text.split(/\n|<br>/).map((line: string, index: number) => (
+//                                         <span key={index}>
+//                                             {line}
+//                                             <br />
+//                                         </span>
+//                                     ))}
+//                                 </p>
+//                             )}
+//                         </div>
+//                     ))}
+//                 </div>
+
+//                 {/* 顯示範例測試資料 */}
+//                 <div className="flex flex-col items-center gap-4 mt-4 w-full max-w-lg justify-content">
+//                     {data.example_cases.map((example: any, index: number) => (
+//                         <div key={index} className="w-full flex flex-col items-center">
+//                             <ExampleButton
+//                                 text={example.title}
+//                                 isActive={activeExample === example.title}
+//                                 onClick={() => setActiveExample(activeExample === example.title ? null : example.title)}
+//                             />
+//                             {activeExample === example.title && (
+//                                 <ExampleContent
+//                                     title={example.title}
+//                                     input={example.input}
+//                                     output={example.output}
+//                                     description={example.description}
+//                                     isVisible={true}
+//                                 />
+//                             )}
+//                         </div>
+//                     ))}
+//                 </div>
+//             </div>
+//         </TabComponentWrapper>
+//     );
+// }
 function IntroTab({ questionData }: { questionData: any }) {
+    // console.log(questionData);
     const [activeExample, setActiveExample] = useState<string | null>(null);
     const [data, setData] = useState<any | null>(null);
 
@@ -109,16 +177,19 @@ function IntroTab({ questionData }: { questionData: any }) {
         }
     }, [questionData]); // 監聽 `questionData` 變更，確保 `data` 正確更新
 
+
+
+
     if (!data) return <p>載入中...</p>;
 
     return (
         <TabComponentWrapper title={data.title}>
-            <div className="w-full max-w-lg max-h-full overflow-y-auto rounded-lg p-2">
+            <div className="w-full  max-h-full overflow-y-auto rounded-lg p-2 max-h-[81vh] ">
                 {/* 顯示題目敘述 */}
-                <div className="w-full px-4 text-xl">
+                <div className="w-full px-4 text-xl ">
                     {data.statements.map((statement: any, index: number) => (
                         <div key={index} className="mb-4">
-                            {statement.text && (
+                            {/* {statement.text && (
                                 <p className="mb-2">
                                     {statement.text.split(/\n|<br>/).map((line: string, index: number) => (
                                         <span key={index}>
@@ -127,7 +198,62 @@ function IntroTab({ questionData }: { questionData: any }) {
                                         </span>
                                     ))}
                                 </p>
+                            )} */}
+                            {/* 處理文字內容 */}
+                            {statement.text && (
+                                <p className="mb-2">
+                                    {statement.text.split(/\n|<br>/).map((line: string, idx: number) => (
+                                        <span key={idx}>
+                                            {line}
+                                            <br />
+                                        </span>
+                                    ))}
+                                </p>
                             )}
+
+                            {/* 處理表格內容（如果 `table` 存在且非空） */}
+                            {statement.table && statement.table.trim() !== "" && (() => {
+                                const parts = statement.table.split(",").map((s: string) => s.trim());
+                                const headers = parts.slice(0, 2); // ['場次', '短片代碼']
+                                const rows: string[][] = [];
+
+                                for (let i = 2; i < parts.length; i += 2) {
+                                    rows.push([parts[i], parts[i + 1]]);
+                                }
+
+                                return (
+                                    <table className="table-auto w-full border-collapse border border-gray-700 mt-2">
+                                        <thead>
+                                            <tr>
+                                                {headers.map((header:any, index:any) => (
+                                                    <th key={index} className="border border-gray-700 px-2 py-1 text-center bg-gray-200">
+                                                        {header}
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {rows.map((row, rowIndex) => (
+                                                <tr key={rowIndex} className="border border-gray-700">
+                                                    {row.map((cell, cellIndex) => (
+                                                        <td key={cellIndex} className="border border-gray-700 px-2 py-1 text-center">
+                                                            {cell}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                );
+                            })()}
+
+
+                            {/* 處理圖片內容（如果 `image` 存在且非空） */}
+                            {/* {statement.image && statement.image.trim() !== "" && (
+                                <div className="flex justify-center mt-2">
+                                    <img src={`${apiMain}${statement.image}`} alt="題目圖片" className="max-w-full h-auto rounded-lg shadow" />
+                                </div>
+                            )} */}
                         </div>
                     ))}
                 </div>
@@ -157,7 +283,6 @@ function IntroTab({ questionData }: { questionData: any }) {
         </TabComponentWrapper>
     );
 }
-
 function CodeDrillTab({ questionData, qid }: qProps) {
     const [activeExample, setActiveExample] = useState<string | null>(null);
     const [output, setOutput] = useState<string>("");
