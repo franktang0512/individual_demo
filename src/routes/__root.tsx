@@ -14,7 +14,7 @@ const RootComponent: React.FC = () => {
 
   const { resetWorkspaces } = useWorkspaceStore();
   const handleResetAndNavigate = () => {
-    resetWorkspaces(); 
+    resetWorkspaces();
   };
 
 
@@ -26,7 +26,7 @@ const RootComponent: React.FC = () => {
         {/* 左側標題 + 題目列表按鈕 */}
         <div className="flex items-center gap-4 flex-shrink-0">
           <h1 className="text-xl font-semibold whitespace-nowrap">
-            114學年度科技教育創意實作競賽【資訊科技組】
+            科技教育創意實作競賽 [資訊科技組] - 程式實作範例
           </h1>
           <Separator orientation="vertical" className="h-6 bg-gray-300" />
           <span className="text-xl font-semibold text-cyan-400">個人賽練習題</span>
@@ -58,7 +58,7 @@ const RootComponent: React.FC = () => {
           <header id="app-header" className="flex justify-between items-center px-12 py-6">
             {/* 左側標題 */}
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold">114學年度科技教育創意實作競賽【資訊科技組】</h1>
+              <h1 className="text-xl font-semibold">科技教育創意實作競賽 [資訊科技組] - 程式實作範例</h1>
               <Separator orientation="vertical" className="mx-2 h-6 bg-gray-300" />
               <span className="text-xl font-semibold text-cyan-400">個人賽練習題</span>
             </div>
