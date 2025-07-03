@@ -28,8 +28,8 @@ const RootComponent: React.FC = () => {
           <h1 className="text-xl font-semibold whitespace-nowrap">
             科技教育創意實作競賽 [資訊科技組] - 程式實作範例
           </h1>
-          <Separator orientation="vertical" className="h-6 bg-gray-300" />
-          <span className="text-xl font-semibold text-cyan-400">個人賽練習題</span>
+          {/* <Separator orientation="vertical" className="h-6 bg-gray-300" />
+          <span className="text-xl font-semibold text-cyan-400">個人賽練習題</span> */}
 
           {/* ✅ 按鈕 - 預設置中，但標題變長時會被擠到標題後面 */}
           {!isOnQuestionListPage && (
@@ -59,8 +59,8 @@ const RootComponent: React.FC = () => {
             {/* 左側標題 */}
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold">科技教育創意實作競賽 [資訊科技組] - 程式實作範例</h1>
-              <Separator orientation="vertical" className="mx-2 h-6 bg-gray-300" />
-              <span className="text-xl font-semibold text-cyan-400">個人賽練習題</span>
+              {/* <Separator orientation="vertical" className="mx-2 h-6 bg-gray-300" />
+              <span className="text-xl font-semibold text-cyan-400">個人賽練習題</span> */}
             </div>
           </header>
           <main id="app-main" className="grow px-8">

@@ -1484,13 +1484,13 @@ function Question({ id }: { id: number }) {
             example_cases: [
                 {
                     title: "範例一",
-                    input: "8 A B C A W A Q A\n5 A",
+                    input: "8\nA B C A W A Q A\n5 A",
                     output: "3",
                     description: "圖書館安排連續播放8場次的短片，\n依序播放系列短片A B C A W A Q A。\n娜娜有時間可以連續看5場次，且最喜歡的是A系列短片。\n\n最佳情形是從第4場開始看 (A W A Q A)，共可以看到3場次的A系列短片，因此輸出 3。"
                 },
                 {
                     title: "範例二",
-                    input: "3 X G X\n2 X",
+                    input: "3\nX G X\n2 X",
                     output: "1",
                     description: "圖書館安排連續播放3場次的短片。\n3場次依序播放短片 X G X。\n娜娜有時間可以連續看2場次，且最喜歡的是X系列短片。\n\n最佳情形是從第 1 場或第 2 場開始看(X G), (G X)都可以看到 1 場，因此輸出 1。"
                 }
