@@ -606,6 +606,7 @@ function SubmitTab({ questionData, qid }: qProps) {
                 subcase: await Promise.all(
                     group.subcase.map(async (sub: any) => {
                         let testInputs: (string | number)[] = [];
+                        let testInputs_n: (string | number)[] = [];
 
                         if (typeof sub.input === "string") {
                             sub.input
@@ -618,27 +619,40 @@ function SubmitTab({ questionData, qid }: qProps) {
                                 });
                         }
 
+                        if (typeof sub.input === "string") {
+                            testInputs_n = sub.input
+                                .split(/\r?\n/)                 // 按行分隔（兼容 Windows/Linux/macOS）
+                                .map((line: string)  => line.trim())       // 去除每行首尾空白
+                                .filter((line: string)  => line.length > 0); // 移除空白行
+                        }
+                        // console.log(testInputs_n);
+                        
                         // 執行 Worker
                         let result = "";
+                        let result1 = "";
                         try {
                             result = await executeInWorker(modifiedCode, testInputs) as string;
+                            result1 = await executeInWorker(modifiedCode, testInputs_n) as string;
+                            // console.log("++++++++++++++++++++++++++");
+
+                            // console.log("__________________________");
                         } catch (error: any) {
                             console.error("❌ 執行錯誤:", error);
                             result = `錯誤: ${error.message}`;
                         }
-
+                        let finalresult =(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim()) || (result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
+                        console.log(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
+                        console.log(result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
                         return {
                             ...sub,
-                            student_output: result,
-                            result: result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim()
+                            student_output: result1,
+                            result:  finalresult
                         };
                     })
                 ),
             }))
         );
-
-
-
+        console.log(studentOutputs);
         // 更新測試結果
         setIsEvaluated(true);
         setCases(studentOutputs);
@@ -1502,31 +1516,31 @@ function Question({ id }: { id: number }) {
                     subcase: [
                         {
                             case_title: "A1",
-                            input: "3 A A B 3 A",
+                            input: "3\nA A B\n3 A",
                             output: "2",
                             score: "6"
                         },
                         {
                             case_title: "A2",
-                            input: "3 C B C 3 D",
+                            input: "3\nC B C\n3 D",
                             output: "0",
                             score: "6"
                         },
                         {
                             case_title: "A3",
-                            input: "4 B A A C 4 C",
+                            input: "4\nB A A C\n4 C",
                             output: "1",
                             score: "6"
                         },
                         {
                             case_title: "A4",
-                            input: "6 C B A A B C 6 B",
+                            input: "6\nC B A A B C\n6 B",
                             output: "2",
                             score: "6"
                         },
                         {
                             case_title: "A5",
-                            input: "12 A B A B B F A F A F B A 12 B",
+                            input: "12\nA B A B B F A F A F B A\n12 B",
                             output: "4",
                             score: "6"
                         }
@@ -1537,49 +1551,49 @@ function Question({ id }: { id: number }) {
                     subcase: [
                         {
                             case_title: "B1",
-                            input: "6 E A B C D A 1 A",
+                            input: "6\nE A B C D A\n1 A",
                             output: "1",
                             score: "5"
                         },
                         {
                             case_title: "B2",
-                            input: "7 A B A C E F D 4 A",
+                            input: "7\nA B A C E F D\n4 A",
                             output: "2",
                             score: "5"
                         },
                         {
                             case_title: "B3",
-                            input: "8 B C F P F G F F 4 F",
+                            input: "8\nB C F P F G F F\n4 F",
                             output: "3",
                             score: "5"
                         },
                         {
                             case_title: "B4",
-                            input: "14 D C C C B A C D C C C C C D 7 C",
+                            input: "14\nD C C C B A C D C C C C C D\n7 C",
                             output: "6",
                             score: "5"
                         },
                         {
                             case_title: "B5",
-                            input: "15 A Z A C Z Z D Z Z B Z Z Z Z C 6 Z",
+                            input: "15\nA Z A C Z Z D Z Z B Z Z Z Z C\n6 Z",
                             output: "5",
                             score: "5"
                         },
                         {
                             case_title: "B6",
-                            input: "20 A A A A A A A B B B B A B B C B B B B B 15 B",
+                            input: "20\nA A A A A A A B B B B A B B C B B B B B\n15 B",
                             output: "11",
                             score: "5"
                         },
                         {
                             case_title: "B7",
-                            input: "20 Z Y X W V U T S R Q P O N M L K J I H G 5 C",
+                            input: "20\nZ Y X W V U T S R Q P O N M L K J I H G\n5 C",
                             output: "0",
                             score: "5"
                         },
                         {
                             case_title: "B8",
-                            input: "20 Z Y X X V U T S P P P P P M L K K J H G 5 K",
+                            input: "20\nZ Y X X V U T S P P P P P M L K K J H G\n5 K",
                             output: "2",
                             score: "5"
                         }
@@ -1590,31 +1604,31 @@ function Question({ id }: { id: number }) {
                     subcase: [
                         {
                             case_title: "C1",
-                            input: "3 B B B 2 B",
+                            input: "3\nB B B\n2 B",
                             output: "2",
                             score: "6"
                         },
                         {
                             case_title: "C2",
-                            input: "3 B B B 3 B",
+                            input: "3\nB B B\n3 B",
                             output: "3",
                             score: "6"
                         },
                         {
                             case_title: "C3",
-                            input: "15 A A A A A A A A A A A A A A A 12 A",
+                            input: "15\nA A A A A A A A A A A A A A A\n12 A",
                             output: "12",
                             score: "6"
                         },
                         {
                             case_title: "C4",
-                            input: "12 A A A A A A A A A A A A 6 B",
+                            input: "12\nA A A A A A A A A A A A\n6 B",
                             output: "0",
                             score: "6"
                         },
                         {
                             case_title: "C5",
-                            input: "15 A B C X X X A A A X X X A A X 6 X",
+                            input: "15\nA B C X X X A A A X X X A A X\n6 X",
                             output: "4",
                             score: "6"
                         }
