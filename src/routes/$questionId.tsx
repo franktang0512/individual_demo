@@ -641,8 +641,8 @@ function SubmitTab({ questionData, qid }: qProps) {
                             result = `錯誤: ${error.message}`;
                         }
                         let finalresult =(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim()) || (result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
-                        console.log(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
-                        console.log(result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
+                        // console.log(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
+                        // console.log(result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
                         return {
                             ...sub,
                             student_output: result1,
