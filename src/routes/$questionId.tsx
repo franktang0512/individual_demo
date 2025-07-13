@@ -606,7 +606,7 @@ function SubmitTab({ questionData, qid }: qProps) {
                 subcase: await Promise.all(
                     group.subcase.map(async (sub: any) => {
                         let testInputs: (string | number)[] = [];
-                        let testInputs_n: (string | number)[] = [];
+                        // let testInputs_n: (string | number)[] = [];
 
                         if (typeof sub.input === "string") {
                             sub.input
@@ -619,6 +619,58 @@ function SubmitTab({ questionData, qid }: qProps) {
                                 });
                         }
 
+                        // if (typeof sub.input === "string") {
+                        //     testInputs_n = sub.input
+                        //         .split(/\r?\n/)                 // 按行分隔（兼容 Windows/Linux/macOS）
+                        //         .map((line: string)  => line.trim())       // 去除每行首尾空白
+                        //         .filter((line: string)  => line.length > 0); // 移除空白行
+                        // }
+                        // console.log(testInputs_n);
+                        
+                        // 執行 Worker
+                        let result = "";
+                        // let result1 = "";
+                        try {
+                            result = await executeInWorker(modifiedCode, testInputs) as string;
+                            // result1 = await executeInWorker(modifiedCode, testInputs_n) as string;
+                            // console.log("++++++++++++++++++++++++++");
+
+                            // console.log("__________________________");
+                        } catch (error: any) {
+                            console.error("❌ 執行錯誤:", error);
+                            result = `錯誤: ${error.message}`;
+                        }
+                        // let finalresult =(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim()) || (result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
+                        // console.log(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
+                        // console.log(result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
+                        return {
+                            ...sub,
+                            student_output: result,
+                            result: result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim()
+                        };
+                    })
+                ),
+            }))
+        );
+        const studentOutputs_n = await Promise.all(
+            cases.map(async (group: any) => ({
+                group_title: group.group_title,
+                subcase: await Promise.all(
+                    group.subcase.map(async (sub: any) => {
+                        // let testInputs: (string | number)[] = [];
+                        let testInputs_n: (string | number)[] = [];
+
+                        // if (typeof sub.input === "string") {
+                        //     sub.input
+                        //         .split(/[\s,]+/)
+                        //         .map((i: string) => i.trim())
+                        //         .filter((i: string) => i.length > 0)
+                        //         .forEach((i: string) => {
+                        //             const num: number = Number(i);
+                        //             testInputs.push(isNaN(num) ? i : num);
+                        //         });
+                        // }
+
                         if (typeof sub.input === "string") {
                             testInputs_n = sub.input
                                 .split(/\r?\n/)                 // 按行分隔（兼容 Windows/Linux/macOS）
@@ -628,35 +680,41 @@ function SubmitTab({ questionData, qid }: qProps) {
                         // console.log(testInputs_n);
                         
                         // 執行 Worker
-                        let result = "";
+                        // let result = "";
                         let result1 = "";
                         try {
-                            result = await executeInWorker(modifiedCode, testInputs) as string;
+                            // result = await executeInWorker(modifiedCode, testInputs) as string;
                             result1 = await executeInWorker(modifiedCode, testInputs_n) as string;
                             // console.log("++++++++++++++++++++++++++");
 
                             // console.log("__________________________");
                         } catch (error: any) {
                             console.error("❌ 執行錯誤:", error);
-                            result = `錯誤: ${error.message}`;
+                            result1 = `錯誤: ${error.message}`;
                         }
-                        let finalresult =(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim()) || (result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
+                        // let finalresult =(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim()) || (result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
                         // console.log(result.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
                         // console.log(result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim());
                         return {
                             ...sub,
                             student_output: result1,
-                            result:  finalresult
+                            result: result1.replace(/\s+/g, "").trim() === sub.output.replace(/\s+/g, "").trim()
                         };
                     })
                 ),
             }))
         );
-        console.log(studentOutputs);
+        // console.log(studentOutputs);
         // 更新測試結果
         setIsEvaluated(true);
-        setCases(studentOutputs);
-        setScore(calculateScore(studentOutputs));
+        if(compareCalculateScore(studentOutputs)>compareCalculateScore(studentOutputs_n)){
+            setCases(studentOutputs);
+            setScore(calculateScore(studentOutputs));
+        }else{
+            setCases(studentOutputs_n);
+            setScore(calculateScore(studentOutputs_n));
+        }
+
         // 將當前程式碼成績紀錄下來
 
         // parsedData.questions[qid][parsedData.questions[qid].length - 1].numerator = numerator;
@@ -666,6 +724,26 @@ function SubmitTab({ questionData, qid }: qProps) {
 
 
         setLoading(false); // 測試完成，隱藏 loader
+    };
+    const compareCalculateScore = (cases: any) => {
+        let totalTests = 0;
+        let correctCount = 0;
+
+        cases.forEach((group: any) => {
+            group.subcase.forEach((sub: any) => {
+                totalTests += Number(sub.score);
+                if (sub.result) correctCount += Number(sub.score);
+            });
+        });
+        // setNumerator(correctCount);
+        // setDenominator(totalTests);
+        const calculatedScore = Math.round((correctCount / totalTests) * 100);
+        parsedData.questions[qid][parsedData.questions[qid].length - 1].score = calculatedScore;
+        parsedData.questions[qid][parsedData.questions[qid].length - 1].numerator = correctCount;
+        parsedData.questions[qid][parsedData.questions[qid].length - 1].denominator = totalTests;
+        localStorage.setItem("stuansers", JSON.stringify(parsedData));
+        console.log(parsedData);
+        return totalTests === 0 ? 0 : Math.round((correctCount / totalTests) * 100);
     };
 
     const calculateScore = (cases: any) => {
