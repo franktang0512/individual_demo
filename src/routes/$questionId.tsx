@@ -1427,31 +1427,31 @@ function Question({ id }: { id: number }) {
                     subcase: [
                         {
                             case_title: "A1",
-                            input: "9 1 2 3 4 5 6 7 8 9 9 9 8 7 6 5 4 3 2 1",
+                            input: "9\n1 2 3 4 5 6 7 8 9\n9\n9 8 7 6 5 4 3 2 1",
                             output: "9 8 7 6 5 4 3 2 1",
                             score: "4"
                         },
                         {
                             case_title: "A2",
-                            input: "1 1 1 1",
+                            input: "1\n1\n1\n1",
                             output: "1",
                             score: "4"
                         },
                         {
                             case_title: "A3",
-                            input: "5 5 3 1 4 2 5 2 3 1 5 4",
+                            input: "5\n5 3 1 4 2\n5\n2 3 1 5 4",
                             output: "2 3 1 5 4",
                             score: "4"
                         },
                         {
                             case_title: "A4",
-                            input: "8 9 8 7 6 5 4 3 2 8 9 8 7 6 5 4 3 2",
+                            input: "8\n9 8 7 6 5 4 3 2\n8\n9 8 7 6 5 4 3 2",
                             output: "9 8 7 6 5 4 3 2",
                             score: "4"
                         },
                         {
                             case_title: "A5",
-                            input: "8 9 8 7 6 5 4 3 2 8 2 3 4 5 6 7 8 9",
+                            input: "8\n9 8 7 6 5 4 3 2\n8\n2 3 4 5 6 7 8 9",
                             output: "2 3 4 5 6 7 8 9",
                             score: "4"
                         }
@@ -1462,31 +1462,31 @@ function Question({ id }: { id: number }) {
                     subcase: [
                         {
                             case_title: "B1",
-                            input: "3 1 2 2 2 1 2",
+                            input: "3\n1 2 2\n2\n1 2",
                             output: "1 2 2",
                             score: "4"
                         },
                         {
                             case_title: "B2",
-                            input: "3 1 2 2 2 2 1",
+                            input: "3\n1 2 2\n2\n2 1",
                             output: "2 2 1",
                             score: "4"
                         },
                         {
                             case_title: "B3",
-                            input: "10 7 7 7 7 9 9 9 9 9 9 2 7 9",
+                            input: "10\n7 7 7 7 9 9 9 9 9 9\n2\n7 9",
                             output: "7 7 7 7 9 9 9 9 9 9",
                             score: "4"
                         },
                         {
                             case_title: "B4",
-                            input: "12 3 8 3 8 3 8 3 8 3 8 3 8 2 8 3",
+                            input: "12\n3 8 3 8 3 8 3 8 3 8 3 8\n2\n8 3",
                             output: "8 8 8 8 8 8 3 3 3 3 3 3",
                             score: "4"
                         },
                         {
                             case_title: "B5",
-                            input: "12 7 9 9 7 7 9 7 7 9 9 9 9 2 9 7",
+                            input: "12\n7 9 9 7 7 9 7 7 9 9 9 9\n2\n9 7",
                             output: "9 9 9 9 9 9 9 7 7 7 7 7",
                             score: "4"
                         }
@@ -1497,61 +1497,61 @@ function Question({ id }: { id: number }) {
                     subcase: [
                         {
                             case_title: "C1",
-                            input: "6 2 3 3 1 2 2 3 2 1 3",
+                            input: "6\n2 3 3 1 2 2\n3\n2 1 3",
                             output: "2 2 2 1 3 3",
                             score: "6"
                         },
                         {
                             case_title: "C2",
-                            input: "8 5 6 6 6 7 5 7 5 3 5 7 6",
+                            input: "8\n5 6 6 6 7 5 7 5\n3\n5 7 6",
                             output: "5 5 5 7 7 6 6 6",
                             score: "6"
                         },
                         {
                             case_title: "C3",
-                            input: "10 9 9 1 1 1 1 3 3 3 3 3 1 9 3",
+                            input: "10\n9 9 1 1 1 1 3 3 3 3\n3\n1 9 3",
                             output: "1 1 1 1 9 9 3 3 3 3",
                             score: "6"
                         },
                         {
                             case_title: "C4",
-                            input: "7 7 8 8 8 7 7 7 2 8 7",
+                            input: "7\n7 8 8 8 7 7 7\n2\n8 7",
                             output: "8 8 8 7 7 7 7",
                             score: "6"
                         },
                         {
                             case_title: "C5",
-                            input: "20 5 5 5 5 5 5 5 5 5 5 9 9 9 9 9 9 9 9 9 9 2 9 5",
+                            input: "20\n5 5 5 5 5 5 5 5 5 5 9 9 9 9 9 9 9 9 9 9\n2\n9 5",
                             output: "9 9 9 9 9 9 9 9 9 9 5 5 5 5 5 5 5 5 5 5",
                             score: "6"
                         },
                         {
                             case_title: "C6",
-                            input: "12 2 1 4 2 3 5 1 3 2 4 5 1 5 5 4 3 2 1",
+                            input: "12\n2 1 4 2 3 5 1 3 2 4 5 1\n5\n5 4 3 2 1",
                             output: "5 5 4 4 3 3 2 2 2 1 1 1",
                             score: "6"
                         },
                         {
                             case_title: "C7",
-                            input: "15 6 7 6 8 6 7 7 8 6 6 7 8 7 8 8 3 8 6 7",
+                            input: "15\n6 7 6 8 6 7 7 8 6 6 7 8 7 8 8\n3\n8 6 7",
                             output: "8 8 8 8 8 6 6 6 6 6 7 7 7 7 7",
                             score: "6"
                         },
                         {
                             case_title: "C8",
-                            input: "10 8 1 8 3 3 8 2 8 2 3 4 1 2 3 8",
+                            input: "10\n8 1 8 3 3 8 2 8 2 3\n4\n1 2 3 8",
                             output: "1 2 2 3 3 3 8 8 8 8",
                             score: "6"
                         },
                         {
                             case_title: "C9",
-                            input: "4 7 7 8 8 2 7 8",
+                            input: "4\n7 7 8 8\n2\n7 8",
                             output: "7 7 8 8",
                             score: "6"
                         },
                         {
                             case_title: "C10",
-                            input: "11 1 9 8 7 6 5 4 3 2 1 9 9 1 2 3 4 5 6 7 8 9",
+                            input: "11\n1 9 8 7 6 5 4 3 2 1 9\n9\n1 2 3 4 5 6 7 8 9",
                             output: "1 1 2 3 4 5 6 7 8 9 9",
                             score: "6"
                         }
