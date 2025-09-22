@@ -43,7 +43,7 @@
 /* ✅ 外部容器 */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 個格子，等寬 */
+    grid-template-columns: repeat(3, 1fr); /* 2 個格子，等寬 */
     gap: 30px; /* 增加格子間距 */
     width: fit-content; /* 自適應內容寬度 */
     padding: 20px; /* 內部留點距離 */

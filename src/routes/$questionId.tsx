@@ -76,40 +76,39 @@ function ExampleContent({
     output,
     description,
     isVisible,
-  }: ExampleContentProps) {
+}: ExampleContentProps) {
     return (
-      <div
-        className={`relative w-[100%] max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${
-          isVisible ? 'opacity-100 py-4' : 'max-h-0 opacity-0 py-0'
-        }`}
-      >
-        <div className="flex justify-between mt-4 p-2 text-white rounded-md border-b">
-          <div className="w-1/2 border-r border-gray-300 pr-2">
-            <p className="font-bold text-center">輸入</p>
-            <div className="mt-1 text-lg ml-2 whitespace-pre-wrap break-words">
-              {input.split('\n').map((line, idx) => (
-                <div key={idx} className="text-left">{line}</div>
-              ))}
+        <div
+            className={`relative w-[100%] max-w-lg bg-[#00A5AD] text-white rounded-lg p-4 shadow-lg overflow-hidden transition-all duration-300 -mt-6 ${isVisible ? 'opacity-100 py-4' : 'max-h-0 opacity-0 py-0'
+                }`}
+        >
+            <div className="flex justify-between mt-4 p-2 text-white rounded-md border-b">
+                <div className="w-1/2 border-r border-gray-300 pr-2">
+                    <p className="font-bold text-center">輸入</p>
+                    <div className="mt-1 text-lg ml-2 whitespace-pre-wrap break-words">
+                        {input.split('\n').map((line, idx) => (
+                            <div key={idx} className="text-left">{line}</div>
+                        ))}
+                    </div>
+                </div>
+                <div className="w-1/2 pl-2">
+                    <p className="font-bold text-center">輸出</p>
+                    <div className="mt-1 text-lg ml-2 whitespace-pre-wrap break-words">
+                        {output.split('\n').map((line, idx) => (
+                            <div key={idx} className="text-left">{line}</div>
+                        ))}
+                    </div>
+                </div>
             </div>
-          </div>
-          <div className="w-1/2 pl-2">
-            <p className="font-bold text-center">輸出</p>
-            <div className="mt-1 text-lg ml-2 whitespace-pre-wrap break-words">
-              {output.split('\n').map((line, idx) => (
-                <div key={idx} className="text-left">{line}</div>
-              ))}
-            </div>
-          </div>
+            <p className="mt-4 text-lg text-left whitespace-pre-wrap break-words">
+                {description.split('\n').map((line, idx) => (
+                    <div key={idx}>{line}</div>
+                ))}
+            </p>
         </div>
-        <p className="mt-4 text-lg text-left whitespace-pre-wrap break-words">
-          {description.split('\n').map((line, idx) => (
-            <div key={idx}>{line}</div>
-          ))}
-        </p>
-      </div>
     )
-  }
-  
+}
+
 
 
 // function IntroTab({ questionData }: { questionData: any }) {
@@ -229,7 +228,7 @@ function IntroTab({ questionData }: { questionData: any }) {
                                     <table className="table-auto w-full border-collapse border border-gray-700 mt-2">
                                         <thead>
                                             <tr>
-                                                {headers.map((header:any, index:any) => (
+                                                {headers.map((header: any, index: any) => (
                                                     <th key={index} className="border border-gray-700 px-2 py-1 text-center bg-gray-200">
                                                         {header}
                                                     </th>
@@ -626,7 +625,7 @@ function SubmitTab({ questionData, qid }: qProps) {
                         //         .filter((line: string)  => line.length > 0); // 移除空白行
                         // }
                         // console.log(testInputs_n);
-                        
+
                         // 執行 Worker
                         let result = "";
                         // let result1 = "";
@@ -674,11 +673,11 @@ function SubmitTab({ questionData, qid }: qProps) {
                         if (typeof sub.input === "string") {
                             testInputs_n = sub.input
                                 .split(/\r?\n/)                 // 按行分隔（兼容 Windows/Linux/macOS）
-                                .map((line: string)  => line.trim())       // 去除每行首尾空白
-                                .filter((line: string)  => line.length > 0); // 移除空白行
+                                .map((line: string) => line.trim())       // 去除每行首尾空白
+                                .filter((line: string) => line.length > 0); // 移除空白行
                         }
                         // console.log(testInputs_n);
-                        
+
                         // 執行 Worker
                         // let result = "";
                         let result1 = "";
@@ -707,10 +706,10 @@ function SubmitTab({ questionData, qid }: qProps) {
         // console.log(studentOutputs);
         // 更新測試結果
         setIsEvaluated(true);
-        if(compareCalculateScore(studentOutputs)>compareCalculateScore(studentOutputs_n)){
+        if (compareCalculateScore(studentOutputs) > compareCalculateScore(studentOutputs_n)) {
             setCases(studentOutputs);
             setScore(calculateScore(studentOutputs));
-        }else{
+        } else {
             setCases(studentOutputs_n);
             setScore(calculateScore(studentOutputs_n));
         }
@@ -1015,6 +1014,7 @@ interface qProps {
     qid: number; // 🔥 這裡新增 qid
 }
 function Question({ id }: { id: number }) {
+    const isBlank = id === 3; // 空白題
     const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
     // const location = useLocation() as { state: Record<string, unknown> }; // ✨
     const location = useLocation();
@@ -1713,6 +1713,18 @@ function Question({ id }: { id: number }) {
                     ]
                 }
             ]
+        },
+        3: {
+            title: "空白題",
+            statements: [
+                {
+                    text: "本題為空白題，供自行練習不同題目使用。\n請自行選定題目撰寫程式，並透過「自行測試」功能，輸入測資測試所寫程式。"
+                },
+            ],
+            example_cases: [
+            ],
+            cases: [
+            ]
         }
     };
 
@@ -1741,17 +1753,31 @@ function Question({ id }: { id: number }) {
                 title: '自行測試',
                 content: <CodeDrillTab questionData={questionData} qid={id} />,
             },
+            // {
+            //     value: 'tab3',
+            //     // title: '任務挑戰',                
+            //     title: '評分',
+            //     content: <SubmitTab questionData={questionData} qid={id} />,
+            // },
+            // {
+            //     value: 'tab4',
+            //     // title: '挑戰紀錄',
+            //     title: '評分紀錄',
+            //     content: <RecordTab questionData={questionData} qid={id} />,
+            // },
             {
                 value: 'tab3',
-                // title: '任務挑戰',                
                 title: '評分',
-                content: <SubmitTab questionData={questionData} qid={id} />,
+                content: isBlank
+                    ? <div className="p-4 text-gray-500">此為空白題，評分功能停用。</div>
+                    : <SubmitTab questionData={questionData} qid={id} />,
             },
             {
                 value: 'tab4',
-                // title: '挑戰紀錄',
                 title: '評分紀錄',
-                content: <RecordTab questionData={questionData} qid={id} />,
+                content: isBlank
+                    ? <div className="p-4 text-gray-500">此為空白題，評分紀錄停用。</div>
+                    : <RecordTab questionData={questionData} qid={id} />,
             },
         ];
     }, [questionData]);  // 🔥 `questionData` 變更時，`tabItems` 會重新計算
