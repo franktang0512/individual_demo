@@ -3,6 +3,7 @@ import "../questions.css"
 import icon1 from "@/assets/icons/1.png"
 import icon2 from "@/assets/icons/2.png"
 import blank_01 from "@/assets/icons/blank_01.png"
+import extra from "@/assets/icons/extra.png"
 
 import { cn } from "@/lib/utils";
 
@@ -22,7 +23,8 @@ interface Question {
 const questionList: Question[] = [
   { id: 1, name: "可口便當", iconUrl: icon1 },
   { id: 2, name: "短片欣賞", iconUrl: icon2 },
-  { id: 3, name: "空白題", iconUrl: blank_01 },
+  { id: 3, name: "空白題", iconUrl: extra },
+
 ];
 
 function Index() {
