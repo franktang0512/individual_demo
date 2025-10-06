@@ -331,7 +331,21 @@ function CodeDrillTab({ questionData, qid }: qProps) {
 
             setOutput(""); // 清空輸出
             // console.log(generatedCode);
-            let sandbox = new Function(`${generatedCode}; return output_result_string;`);
+
+
+
+
+            // 1) 加一段 policy：覆寫 prompt，只取第一個以空白分隔的字
+            const policy = `
+            globalThis.prompt = ((orig)=> (msg, def) => {
+                const raw = (typeof orig==='function' ? orig(msg, def) : def) ?? '';
+                const first = String(raw).trim().split(/\\s+/)[0] ?? '';
+                return first; // ← 只回傳第一個 token
+            })(globalThis.prompt);
+            `;
+
+            // 2) 把 policy 串在 generatedCode 前面再執行
+            let sandbox = new Function(`${policy}\n${generatedCode}; return output_result_string;`);
             const result = sandbox();
             setOutput(result);
         } catch (error) {
