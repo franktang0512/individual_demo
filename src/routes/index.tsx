@@ -68,28 +68,32 @@ function Index() {
 
           {/* 輸入說明：滿版放大（維持你剛要的 full-bleed） */}
           <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="
-              mt-1
-              w-full
-              -mx-2 sm:-mx-4 md:-mx-6 lg:-mx-8
-              rounded-none sm:rounded-lg
-              ring-0 sm:ring-1 sm:ring-black/5 hover:sm:ring-black/10
-              transition
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60
-              overflow-hidden
-            "
-            aria-label="放大檢視輸入說明圖片"
-          >
-            <img
-              src={inputguide}
-              alt="輸入說明"
-              loading="lazy"
-              decoding="async"
-              className="block w-full h-auto object-contain max-h-[88vh]"
-            />
-          </button>
+  type="button"
+  onClick={() => setOpen(true)}
+  className="group mt-1 w-full p-0 bg-transparent outline-none focus:outline-none ring-0 focus-visible:ring-0"
+  aria-label="放大檢視輸入說明圖片"
+>
+  <div
+    className="
+      -mx-2 sm:-mx-4 md:-mx-6 lg:-mx-8
+      w-[calc(100%+1rem)] sm:w-[calc(100%+2rem)] md:w-[calc(100%+3rem)] lg:w-[calc(100%+4rem)]
+      rounded-none sm:rounded-lg overflow-hidden
+      !ring-0 !border-0 !shadow-none
+      hover:!ring-0 focus-within:!ring-0
+      bg-inherit
+    "
+  >
+    <img
+      src={inputguide}
+      alt="輸入說明"
+      loading="lazy"
+      decoding="async"
+      className="block w-full h-auto object-contain max-h-[88vh] select-none"
+      draggable={false}
+    />
+  </div>
+</button>
+
         </div>
       </div>
 
