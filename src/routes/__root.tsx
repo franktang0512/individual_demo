@@ -57,7 +57,7 @@ const RootComponent: React.FC = () => {
         <>
           <header id="app-header" className="flex justify-between items-center px-12 py-6">
             {/* 左側標題 */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <h1 className="text-xl font-semibold">科技教育創意實作競賽 [資訊科技組] - 程式實作範例</h1>
               {/* <Separator orientation="vertical" className="mx-2 h-6 bg-gray-300" />
               <span className="text-xl font-semibold text-cyan-400">個人賽練習題</span> */}

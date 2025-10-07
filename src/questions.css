@@ -49,10 +49,10 @@
     padding: 20px; /* 內部留點距離 */
     border-radius: 15px; /* 圓角效果 */
     margin: auto; /* ⬅️ 讓整個網格水平置中 */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* ⬅️ 讓它垂直置中 */
+    /* position: absolute; */
+    /* top: 20%; */
+    /* left: 50%; */
+    /* transform: translate(-50%, -50%); ⬅️ 讓它垂直置中 */
 }
 
 /* ✅ 格子設定 */
@@ -63,8 +63,8 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     width: 180px;
-    height: 150px; /* ✅ 降低高度，減少底部空白 */
-    padding-top: 50px; /* ✅ 確保 h3 不會被圖片擠壓 */
+    height: 100px; /* ✅ 降低高度，減少底部空白 */
+    padding-top: 30px; /* ✅ 確保 h3 不會被圖片擠壓 */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -88,3 +88,13 @@
     color: #5A3E36;
     margin-top: 20px; /* ✅ 確保文字不會太靠上 */
 }
+
+/* 讓整頁上下排列、置中 */
+.questions-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0px;           /* 上方網格與下方公告的距離 */
+  padding: 0px 0px;  /* 視覺上留白，可自行調整 */
+}
+
