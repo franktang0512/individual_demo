@@ -33,7 +33,7 @@ function Index() {
         <div className="flex flex-col items-center">
 
           {/* 三個題目卡片：等比例放大 1.15x（維持原來比例） */}
-          <div className="-mt-6 md:-mt-8 mb-2 md:mb-3 grid grid-cols-3 gap-3 mx-auto">
+          <div className="-mt-0 md:-mt-0 mb-2 md:mb-3 grid grid-cols-3 gap-3 mx-auto">
             {questionList.map((q) => (
               <Link
                 key={q.id}
@@ -90,7 +90,7 @@ function Index() {
     alt="輸入說明"
     loading="lazy"
     decoding="async"
-    className="block w-full h-auto object-contain max-h-[88vh] select-none"
+    className="block w-full h-auto object-contain max-h-[70vh] select-none"
     draggable={false}
   />
 </div>
