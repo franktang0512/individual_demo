@@ -340,7 +340,7 @@ export function initializeScratch() {
     // }\n
     // `;
     var code = `
-    system_input = window.prompt(${value_question}) ?? "";\n
+    system_input = getInput(${value_question}) ?? "";\n
     system_input = system_input.toString();\n
     temp_input = system_input.toString().trim();
     if(temp_input === ""){

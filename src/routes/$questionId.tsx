@@ -330,6 +330,12 @@ function CodeDrillTab({ questionData, qid }: qProps) {
             }
 
             setOutput(""); // 清空輸出
+
+
+            (window as any).getInput = (msg?: any) => {
+                const raw = window.prompt(msg ?? "") ?? "";
+                return raw;
+            };
             // console.log(generatedCode);
 
             // // 1) 加一段 policy：覆寫 prompt，只取第一個以空白分隔的字
@@ -568,10 +574,24 @@ function SubmitTab({ questionData, qid }: qProps) {
             }
         }
 
-        let modifiedCode = generatedCode.replace(
-            /window\.prompt\([^\(\)]*\)/g,
-            "(testInputs.length > 0 ? testInputs.shift() : (() => { throw new Error('輸入（詢問）次數過多'); })())"
-        );
+        // let modifiedCode = generatedCode.replace(
+        //     /window\.prompt\([^\(\)]*\)/g,
+        //     "(testInputs.length > 0 ? testInputs.shift() : (() => { throw new Error('輸入（詢問）次數過多'); })())"
+        // );
+        const promptShim = `
+const __promptWrapper = (msg) => (
+  testInputs.length > 0
+    ? testInputs.shift()
+    : (() => { throw new Error('輸入（詢問）次數過多'); })()
+);
+// Scratch 的 event_askandwait 已經改成用 getInput，這裡一起接上
+const getInput = __promptWrapper;
+`;
+
+        // 👉 再把程式碼裡所有的 window.prompt 換成 __promptWrapper
+        const modifiedCode =
+            promptShim + generatedCode.replace(/window\.prompt/g, "__promptWrapper");
+        console.log(modifiedCode);
 
         // const timestamp = new Date().toISOString();
         // const timestamp = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
@@ -665,6 +685,7 @@ function SubmitTab({ questionData, qid }: qProps) {
                 ),
             }))
         );
+        // console.log(studentOutputs);
         const studentOutputs_n = await Promise.all(
             cases.map(async (group: any) => ({
                 group_title: group.group_title,
@@ -717,6 +738,7 @@ function SubmitTab({ questionData, qid }: qProps) {
                 ),
             }))
         );
+        // console.log(studentOutputs_n);
         // console.log(studentOutputs);
         // 更新測試結果
         setIsEvaluated(true);
