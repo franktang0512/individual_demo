@@ -1665,7 +1665,7 @@ export function initializeScratch() {
 
   };
   javascriptGenerator.forBlock["scratch_list2d_setsize"] = function (block) {
-    const listName = javascriptGenerator.nameDB_.getName(
+    const listName = javascriptGenerator.nameDB_!.getName(
       block.getFieldValue("LIST"),
       Blockly.Names.NameType.VARIABLE
     );
@@ -1688,7 +1688,7 @@ export function initializeScratch() {
     },
   };
   javascriptGenerator.forBlock["scratch_list2d_get"] = function (block) {
-    const listName = javascriptGenerator.nameDB_.getName(
+    const listName = javascriptGenerator.nameDB_!.getName(
       block.getFieldValue("LIST"),
       Blockly.Names.NameType.VARIABLE
     );
@@ -1735,7 +1735,7 @@ export function initializeScratch() {
     },
   };
   javascriptGenerator.forBlock["scratch_list2d_get_item"] = function (block) {
-    const listName = javascriptGenerator.nameDB_.getName(
+    const listName = javascriptGenerator.nameDB_!.getName(
       block.getFieldValue("LIST"),
       Blockly.Names.NameType.VARIABLE
     );
@@ -1798,8 +1798,7 @@ export function initializeScratch() {
       console.warn("Field 'LIST' not found on block:", block);
       return "";
     }
-
-    const listName = javascriptGenerator.nameDB_.getName(
+    const listName = javascriptGenerator.nameDB_!.getName(
       field.getText(),
       Blockly.Names.NameType.VARIABLE
     );
